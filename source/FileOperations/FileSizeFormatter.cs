@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace DuplicatesFinder
 {
     internal static class FileSizeFormatter
     {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static string Format(long size)
         {
             if (size <= 1024)
@@ -23,6 +25,7 @@ namespace DuplicatesFinder
             return (size / 1024 / 1024 / 1024).ToString() + " Gb.";
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static bool GetFileSize(string path, out long size)
         {
             try
@@ -31,10 +34,10 @@ namespace DuplicatesFinder
                 size = fi.Length;
                 return true;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 size = 0;
-                Globals.ReportError(ex, false);
+                Log.Error("Failed to get size of object: " + path);
                 return false;
             }
         }

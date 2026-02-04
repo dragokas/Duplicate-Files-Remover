@@ -13,9 +13,6 @@ if not exist "%release_dir%\%prj%.exe" (
   dotnet build "DuplicatesFinder.sln" --configuration Release /p:Platform="Any CPU"
 )
 
-cd
-echo "%release_dir%\%prj%.exe"
-
 if not exist "%release_dir%\%prj%.exe" (
   echo Failed to build the solution!
   pause>NUL & exit /b

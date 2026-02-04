@@ -11,6 +11,10 @@ namespace DuplicatesFinder
         {
             try
             {
+                if (!File.Exists(path))
+                {
+                    return true;
+                }
                 File.SetAttributes(path, FileAttributes.Normal);
                 if (toRecycleBin)
                 {
@@ -21,7 +25,6 @@ namespace DuplicatesFinder
                     path = @"\\?\" + path;
                 }
                 File.Delete(path);
-                
                 return true;
             }
             catch (Exception ex)

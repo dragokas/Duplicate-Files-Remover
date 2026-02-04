@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Hashing;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
@@ -59,7 +60,7 @@ namespace DuplicatesFinder
 
             List<FileCompareMetadata> filesMetadata = new();
 
-            foreach (var file in  fileList_WithIdenticalSize)
+            foreach (var file in fileList_WithIdenticalSize)
             {
                 try
                 {
@@ -70,10 +71,15 @@ namespace DuplicatesFinder
                         filesMetadata.Add(meta);
                     }
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
-                    MessageBox.Show("Failed to read file. Error: " + e.Message);
+                    Log.Error("Failed to read file: " + file);
                 }
+            }
+
+            if (filesMetadata.Count < 2)
+            {
+                return null;
             }
 
             // FIRST -> make fast partial compare (of last 1024 bytes)
@@ -137,6 +143,7 @@ namespace DuplicatesFinder
                     .ToList();
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private bool IsFullySameFile(FileCompareMetadata fileMetadata1, FileCompareMetadata fileMetadata2)
         {
             return (fileMetadata1.Size == fileMetadata2.Size)
@@ -144,6 +151,7 @@ namespace DuplicatesFinder
             
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private bool IsPartiallySameFile(FileCompareMetadata fileMetadata1, FileCompareMetadata fileMetadata2)
         {
             return (fileMetadata1.Size == fileMetadata2.Size)

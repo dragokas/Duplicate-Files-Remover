@@ -47,7 +47,10 @@
             labelSearchTime = new Label();
             labelProgressBar = new Label();
             timerUpdate = new System.Windows.Forms.Timer(components);
+            contextMenuStrip1 = new ContextMenuStrip(components);
+            openToolStripMenuItem = new ToolStripMenuItem();
             groupBox1.SuspendLayout();
+            contextMenuStrip1.SuspendLayout();
             SuspendLayout();
             // 
             // listViewResult
@@ -63,6 +66,7 @@
             listViewResult.UseCompatibleStateImageBehavior = false;
             listViewResult.View = View.Details;
             listViewResult.ItemChecked += listViewResult_ItemChecked;
+            listViewResult.MouseUp += listViewResult_MouseUp;
             // 
             // columnHeaderPath
             // 
@@ -204,6 +208,20 @@
             timerUpdate.Interval = 1000;
             timerUpdate.Tick += timerUpdate_Tick;
             // 
+            // contextMenuStrip1
+            // 
+            contextMenuStrip1.ImageScalingSize = new Size(28, 28);
+            contextMenuStrip1.Items.AddRange(new ToolStripItem[] { openToolStripMenuItem });
+            contextMenuStrip1.Name = "contextMenuStrip1";
+            contextMenuStrip1.Size = new Size(138, 40);
+            // 
+            // openToolStripMenuItem
+            // 
+            openToolStripMenuItem.Name = "openToolStripMenuItem";
+            openToolStripMenuItem.Size = new Size(137, 36);
+            openToolStripMenuItem.Text = "Open";
+            openToolStripMenuItem.Click += openToolStripMenuItem_Click;
+            // 
             // FormResults
             // 
             AutoScaleDimensions = new SizeF(12F, 30F);
@@ -224,6 +242,7 @@
             Shown += FormResults_Shown;
             groupBox1.ResumeLayout(false);
             groupBox1.PerformLayout();
+            contextMenuStrip1.ResumeLayout(false);
             ResumeLayout(false);
             PerformLayout();
         }
@@ -247,5 +266,7 @@
         private Label labelSearchTime;
         private Label labelProgressBar;
         private System.Windows.Forms.Timer timerUpdate;
+        private ContextMenuStrip contextMenuStrip1;
+        private ToolStripMenuItem openToolStripMenuItem;
     }
 }

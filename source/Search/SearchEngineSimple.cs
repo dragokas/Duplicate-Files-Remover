@@ -14,13 +14,20 @@ namespace DuplicatesFinder
 
             foreach (var directory in directoryList)
             {
-                if (File.Exists(directory))
+                try
                 {
-                    AddFile(@"\\?\" + directory);
+                    if (File.Exists(directory))
+                    {
+                        AddFile(@"\\?\" + directory);
+                    }
+                    else if (Directory.Exists(directory))
+                    {
+                        Globals.SearchThreadMan.AddTask(new SearchTask(@"\\?\" + directory));
+                    }
                 }
-                else if (Directory.Exists(directory))
+                catch (Exception)
                 {
-                    Globals.SearchThreadMan.AddTask(new SearchTask(@"\\?\" + directory));
+                    Log.Error("Failed to check Exists() of object: " + directory);
                 }
             }
 
@@ -47,9 +54,9 @@ namespace DuplicatesFinder
                     }
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                Globals.ReportError(ex);
+                Log.Error("Failed to enumerate object: " + directory);
             }
         }
 

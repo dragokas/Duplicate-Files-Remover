@@ -1,4 +1,5 @@
-﻿using System.Collections.Concurrent;
+﻿using DuplicatesFinder.FileOperations;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
@@ -130,7 +131,7 @@ namespace DuplicatesFinder
         {
             var pairedGroups = _cachedGroupList.GetPairedGroupList();
             _cachedGroupList.Clear();
-            
+
             listViewResult.BeginUpdate();
             listViewResult.Items.Clear();
 
@@ -206,8 +207,32 @@ namespace DuplicatesFinder
         {
             timerUpdate.Enabled = false;
         }
-    }
-       
 
-    
+        private void openToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (listViewResult.SelectedItems.Count != 0)
+            {
+                string path = listViewResult.SelectedItems[0].Text;
+                Shell.Open(path);
+            }
+        }
+
+        private void listViewResult_MouseUp(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Right)
+            {
+                ListViewItem? item = listViewResult.GetItemAt(e.X, e.Y);
+
+                if (item != null)
+                {
+                    listViewResult.SelectedItems.Clear();
+                    item.Selected = true;
+
+                    Point screenPoint = listViewResult.PointToScreen(e.Location); // consider DPI
+                    contextMenuStrip1.Show(screenPoint);
+                }
+            }
+        }
+    }
+
 }
