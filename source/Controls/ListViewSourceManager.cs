@@ -19,6 +19,11 @@ namespace DuplicatesFinder
             _lv.GridLines = true;
             _lv.View = View.Details;
         }
+
+        public ListView GetListView()
+        {
+            return _lv;
+        }
         
         public void Add(string path, bool isChecked = true)
         {
@@ -36,6 +41,37 @@ namespace DuplicatesFinder
                 lvi.Checked = true;
             }
             _lv.Items.Add(lvi);
+        }
+
+        public void Add_AsInvoke(string path, bool isChecked = true)
+        {
+            _lv.BeginInvoke(() => Add(path, isChecked));
+        }
+
+        public void Clear()
+        {
+            _lv.Items.Clear();
+        }
+
+        public string? GetSelectedPath()
+        {
+            if (_lv.SelectedItems.Count == 0)
+                return null;
+
+            return _lv.SelectedItems[0].ToString();
+        }
+
+        public int? GetSelectedIndex()
+        {
+            if (_lv.SelectedItems.Count == 0)
+                return null;
+
+            return _lv.SelectedItems[0].Index;
+        }
+
+        public void RemoveItem(int index)
+        {
+            _lv.Items.RemoveAt(index);
         }
 
         private void UpdateDuplicateCount(int index, int count)

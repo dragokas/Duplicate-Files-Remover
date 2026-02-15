@@ -7,6 +7,8 @@ set prj=DuplicateFilesRemover
 set db=FileSystem
 set release_dir=%~dp0bin\Release\net10.0-windows7.0
 
+rd /s /q "%release_dir%"
+
 :: Compile project if needed
 if not exist "%release_dir%\%prj%.exe" (
   set DOTNET_CLI_TELEMETRY_OPTOUT=1
@@ -21,17 +23,17 @@ if not exist "%release_dir%\%prj%.exe" (
 cd /d "%release_dir%"
 
 :: Remove logfile
-del "main.log"
-del "%prj%.deps.json"
-del "%prj%.pdb"
+2>nul del "main.log"
+2>nul del "%prj%.deps.json"
+2>nul del "%prj%.pdb"
 :: Remove database
-del "%db%.db"
-del "%db%.db-shm"
-del "%db%.db-wal"
+2>nul del "%db%.db"
+2>nul del "%db%.db-shm"
+2>nul del "%db%.db-wal"
 :: Remove unused dlls
-del "SQLitePCLRaw.batteries_v2.dll"
-del "SQLitePCLRaw.core.dll"
-del "SQLitePCLRaw.provider.e_sqlite3.dll"
+2>nul del "SQLitePCLRaw.batteries_v2.dll"
+2>nul del "SQLitePCLRaw.core.dll"
+2>nul del "SQLitePCLRaw.provider.e_sqlite3.dll"
 pushd runtimes
 for /f %%a in ('dir /b /ad') do (
   if "%%a" neq "win-x64" if "%%a" neq "win-x86" rd /s /q "%%a"

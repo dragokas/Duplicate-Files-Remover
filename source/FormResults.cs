@@ -1,5 +1,4 @@
-﻿using DuplicatesFinder.FileOperations;
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
@@ -21,6 +20,7 @@ namespace DuplicatesFinder
         internal FormResults(List<string> pathList, FileCompareMethod fileCompareMethod)
         {
             InitializeComponent();
+            ResizePathColumnWidth();
             _pathList = pathList;
             _fileCompareMethod = fileCompareMethod;
             _progressBarData = new(labelProgressBar);
@@ -112,6 +112,13 @@ namespace DuplicatesFinder
             int countSuccess = 0;
             int countFailed = 0;
             bool toRecycleBin = checkBoxRecycleBin.Checked;
+
+            if (MessageBox.Show($"Remove {selectedPathList.Count} files " +
+                (toRecycleBin ? "to Recycle bin?" : "completely?"), 
+                "", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.No)
+            {
+                return;
+            }
 
             foreach (var filePath in selectedPathList)
             {
@@ -216,6 +223,14 @@ namespace DuplicatesFinder
                 Shell.Open(path);
             }
         }
+        private void openFolderToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (listViewResult.SelectedItems.Count != 0)
+            {
+                string path = listViewResult.SelectedItems[0].Text;
+                Shell.OpenFolder(Directory.GetParent(path)?.FullName);
+            }
+        }
 
         private void listViewResult_MouseUp(object sender, MouseEventArgs e)
         {
@@ -233,6 +248,25 @@ namespace DuplicatesFinder
                 }
             }
         }
+
+        private void splitContainer1_SplitterMoved(object sender, SplitterEventArgs e)
+        {
+            Geometry.LimitContainerPanel2MaxSize(splitContainer1, splitContainer1.Panel2MinSize);
+            ResizePathColumnWidth();
+        }
+
+        private void ResizePathColumnWidth()
+        {
+            int allColumnsWidth = 0;
+            foreach (ColumnHeader column in listViewResult.Columns)
+            {
+                allColumnsWidth += column.Width;
+            }
+            listViewResult.Columns[0].Width =
+                listViewResult.Width - (allColumnsWidth - listViewResult.Columns[0].Width) - SystemInformation.VerticalScrollBarWidth;
+        }
+
+        
     }
 
 }

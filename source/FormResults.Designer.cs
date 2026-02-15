@@ -49,19 +49,28 @@
             timerUpdate = new System.Windows.Forms.Timer(components);
             contextMenuStrip1 = new ContextMenuStrip(components);
             openToolStripMenuItem = new ToolStripMenuItem();
+            panel1 = new Panel();
+            splitContainer1 = new SplitContainer();
+            openFolderToolStripMenuItem = new ToolStripMenuItem();
             groupBox1.SuspendLayout();
             contextMenuStrip1.SuspendLayout();
+            panel1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
+            splitContainer1.Panel1.SuspendLayout();
+            splitContainer1.Panel2.SuspendLayout();
+            splitContainer1.SuspendLayout();
             SuspendLayout();
             // 
             // listViewResult
             // 
             listViewResult.CheckBoxes = true;
             listViewResult.Columns.AddRange(new ColumnHeader[] { columnHeaderPath, columnHeaderDuplicateCount, columnHeaderDuplicatesSize });
+            listViewResult.Dock = DockStyle.Fill;
             listViewResult.FullRowSelect = true;
             listViewResult.GridLines = true;
-            listViewResult.Location = new Point(12, 12);
+            listViewResult.Location = new Point(0, 0);
             listViewResult.Name = "listViewResult";
-            listViewResult.Size = new Size(1071, 570);
+            listViewResult.Size = new Size(1350, 314);
             listViewResult.TabIndex = 4;
             listViewResult.UseCompatibleStateImageBehavior = false;
             listViewResult.View = View.Details;
@@ -125,7 +134,7 @@
             // 
             // buttonCancelSearch
             // 
-            buttonCancelSearch.Location = new Point(12, 601);
+            buttonCancelSearch.Location = new Point(8, 8);
             buttonCancelSearch.Name = "buttonCancelSearch";
             buttonCancelSearch.Size = new Size(152, 54);
             buttonCancelSearch.TabIndex = 10;
@@ -151,7 +160,7 @@
             groupBox1.Controls.Add(label1);
             groupBox1.Controls.Add(labelFileSizeSelected);
             groupBox1.Controls.Add(label2);
-            groupBox1.Location = new Point(456, 582);
+            groupBox1.Location = new Point(444, 3);
             groupBox1.Name = "groupBox1";
             groupBox1.Size = new Size(627, 131);
             groupBox1.TabIndex = 12;
@@ -170,7 +179,7 @@
             // label3
             // 
             label3.AutoSize = true;
-            label3.Location = new Point(170, 606);
+            label3.Location = new Point(166, 13);
             label3.Name = "label3";
             label3.Size = new Size(127, 30);
             label3.TabIndex = 13;
@@ -179,7 +188,7 @@
             // label4
             // 
             label4.AutoSize = true;
-            label4.Location = new Point(170, 654);
+            label4.Location = new Point(166, 61);
             label4.Name = "label4";
             label4.Size = new Size(127, 30);
             label4.TabIndex = 14;
@@ -188,7 +197,7 @@
             // labelSearchTime
             // 
             labelSearchTime.AutoSize = true;
-            labelSearchTime.Location = new Point(304, 654);
+            labelSearchTime.Location = new Point(300, 61);
             labelSearchTime.Name = "labelSearchTime";
             labelSearchTime.Size = new Size(24, 30);
             labelSearchTime.TabIndex = 15;
@@ -197,7 +206,7 @@
             // labelProgressBar
             // 
             labelProgressBar.AutoSize = true;
-            labelProgressBar.Location = new Point(304, 606);
+            labelProgressBar.Location = new Point(300, 13);
             labelProgressBar.Name = "labelProgressBar";
             labelProgressBar.Size = new Size(55, 30);
             labelProgressBar.TabIndex = 16;
@@ -211,29 +220,65 @@
             // contextMenuStrip1
             // 
             contextMenuStrip1.ImageScalingSize = new Size(28, 28);
-            contextMenuStrip1.Items.AddRange(new ToolStripItem[] { openToolStripMenuItem });
+            contextMenuStrip1.Items.AddRange(new ToolStripItem[] { openToolStripMenuItem, openFolderToolStripMenuItem });
             contextMenuStrip1.Name = "contextMenuStrip1";
-            contextMenuStrip1.Size = new Size(138, 40);
+            contextMenuStrip1.Size = new Size(271, 114);
             // 
             // openToolStripMenuItem
             // 
             openToolStripMenuItem.Name = "openToolStripMenuItem";
-            openToolStripMenuItem.Size = new Size(137, 36);
+            openToolStripMenuItem.Size = new Size(270, 36);
             openToolStripMenuItem.Text = "Open";
             openToolStripMenuItem.Click += openToolStripMenuItem_Click;
+            // 
+            // panel1
+            // 
+            panel1.Controls.Add(labelProgressBar);
+            panel1.Controls.Add(labelSearchTime);
+            panel1.Controls.Add(groupBox1);
+            panel1.Controls.Add(label4);
+            panel1.Controls.Add(label3);
+            panel1.Controls.Add(buttonCancelSearch);
+            panel1.Dock = DockStyle.Fill;
+            panel1.Location = new Point(0, 0);
+            panel1.Name = "panel1";
+            panel1.Size = new Size(1350, 148);
+            panel1.TabIndex = 17;
+            // 
+            // splitContainer1
+            // 
+            splitContainer1.Dock = DockStyle.Fill;
+            splitContainer1.Location = new Point(0, 0);
+            splitContainer1.Name = "splitContainer1";
+            splitContainer1.Orientation = Orientation.Horizontal;
+            // 
+            // splitContainer1.Panel1
+            // 
+            splitContainer1.Panel1.Controls.Add(listViewResult);
+            splitContainer1.Panel1MinSize = 300;
+            // 
+            // splitContainer1.Panel2
+            // 
+            splitContainer1.Panel2.Controls.Add(panel1);
+            splitContainer1.Panel2MinSize = 140;
+            splitContainer1.Size = new Size(1350, 466);
+            splitContainer1.SplitterDistance = 314;
+            splitContainer1.TabIndex = 18;
+            splitContainer1.SplitterMoved += splitContainer1_SplitterMoved;
+            // 
+            // openFolderToolStripMenuItem
+            // 
+            openFolderToolStripMenuItem.Name = "openFolderToolStripMenuItem";
+            openFolderToolStripMenuItem.Size = new Size(270, 36);
+            openFolderToolStripMenuItem.Text = "Open Folder";
+            openFolderToolStripMenuItem.Click += openFolderToolStripMenuItem_Click;
             // 
             // FormResults
             // 
             AutoScaleDimensions = new SizeF(12F, 30F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(1095, 725);
-            Controls.Add(labelProgressBar);
-            Controls.Add(labelSearchTime);
-            Controls.Add(label4);
-            Controls.Add(label3);
-            Controls.Add(groupBox1);
-            Controls.Add(buttonCancelSearch);
-            Controls.Add(listViewResult);
+            ClientSize = new Size(1350, 466);
+            Controls.Add(splitContainer1);
             Icon = (Icon)resources.GetObject("$this.Icon");
             Name = "FormResults";
             StartPosition = FormStartPosition.CenterParent;
@@ -243,8 +288,13 @@
             groupBox1.ResumeLayout(false);
             groupBox1.PerformLayout();
             contextMenuStrip1.ResumeLayout(false);
+            panel1.ResumeLayout(false);
+            panel1.PerformLayout();
+            splitContainer1.Panel1.ResumeLayout(false);
+            splitContainer1.Panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)splitContainer1).EndInit();
+            splitContainer1.ResumeLayout(false);
             ResumeLayout(false);
-            PerformLayout();
         }
 
         #endregion
@@ -268,5 +318,8 @@
         private System.Windows.Forms.Timer timerUpdate;
         private ContextMenuStrip contextMenuStrip1;
         private ToolStripMenuItem openToolStripMenuItem;
+        private Panel panel1;
+        private SplitContainer splitContainer1;
+        private ToolStripMenuItem openFolderToolStripMenuItem;
     }
 }

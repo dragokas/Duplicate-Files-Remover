@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
 
-namespace DuplicatesFinder.FileOperations
+namespace System
 {
     internal static class Shell
     {
@@ -19,6 +19,21 @@ namespace DuplicatesFinder.FileOperations
                 UseShellExecute = true
             });
             return (process != null && process.Id != 0);
+        }
+
+        internal static void OpenFolder(string? folder)
+        {
+            if (!Directory.Exists(folder))
+            {
+                return;
+            }
+            var process = Process.Start(new ProcessStartInfo()
+            {
+                FileName = "explorer.exe",
+                Arguments = folder,
+                UseShellExecute = false
+            });
+            process?.Dispose();
         }
     }
 }
