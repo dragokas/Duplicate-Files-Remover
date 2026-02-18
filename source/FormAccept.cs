@@ -7,6 +7,7 @@ namespace DuplicatesFinder
         ListViewSourceManager _sourceList;
         ListView _lv;
         DragDropOverlay _dragDropOverlay;
+        bool _isFormLoaded = false;
 
         public FormAccept()
         {
@@ -23,6 +24,7 @@ namespace DuplicatesFinder
         {
             _dragDropOverlay.CreateOverlayWindow(this.Handle, 0, 0, pictureBoxDropFiles.Width, pictureBoxDropFiles.Height);
             _dragDropOverlay.FileDropped += DragDropOverlay_FileDropped;
+            _isFormLoaded = true;
             MoveOverlay();
         }
 
@@ -43,8 +45,11 @@ namespace DuplicatesFinder
 
         private void MoveOverlay()
         {
-            var location = pictureBoxDropFiles.PointToScreen(Point.Empty);
-            _dragDropOverlay.Move(location.X, location.Y);
+            if (_isFormLoaded)
+            {
+                var location = pictureBoxDropFiles.PointToScreen(Point.Empty);
+                _dragDropOverlay?.Move(location.X, location.Y);
+            }
         }
 
         private async void buttonSearch_Click(object sender, EventArgs e)

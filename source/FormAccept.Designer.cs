@@ -285,7 +285,7 @@
             Icon = (Icon)resources.GetObject("$this.Icon");
             Name = "FormAccept";
             StartPosition = FormStartPosition.CenterScreen;
-            Text = "Duplicate Files Remover";
+            Text = "Find My Duplicates";
             Load += FormAccept_Load;
             LocationChanged += FormAccept_LocationChanged;
             DragDrop += Form1_DragDrop;
