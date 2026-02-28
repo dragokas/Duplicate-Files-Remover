@@ -15,7 +15,11 @@ namespace DuplicatesFinder
         }
         internal void Start() => _elapsedWatcher.Start();
         internal void Stop() => _elapsedWatcher.Stop();
-        internal void Reset() => _elapsedWatcher.Reset();
+        internal void Reset()
+        {
+            _elapsedWatcher.Reset();
+            Print();
+        }
         internal void Print()
         {
             _searchTimeLabel.Invoke(new Action(() =>

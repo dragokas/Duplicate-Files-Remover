@@ -12,6 +12,8 @@ namespace DuplicatesFinder
             Globals.SearchThreadMan = new(Environment.ProcessorCount);
             Globals.DB.RemoveAll();
 
+            int numRootTasks = 0;
+
             foreach (var directory in directoryList)
             {
                 try
@@ -23,15 +25,19 @@ namespace DuplicatesFinder
                     else if (Directory.Exists(directory))
                     {
                         Globals.SearchThreadMan.AddTask(new SearchTask(@"\\?\" + directory));
+                        ++numRootTasks;
                     }
                 }
                 catch (Exception)
                 {
-                    Log.Error("Failed to check Exists() of object: " + directory);
+                    Log.Error("Access Denied for object: " + directory);
                 }
             }
 
-            await Globals.SearchThreadMan.WaitForTaskCompletion();
+            if (numRootTasks > 0)
+            {
+                await Globals.SearchThreadMan.WaitForTaskCompletion();
+            }
         }
 
         internal static void SearchDirectory(string directory)

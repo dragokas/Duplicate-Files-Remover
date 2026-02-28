@@ -11,6 +11,11 @@ namespace DuplicatesFinder
         private readonly Dictionary<string, int> _groupIndex = new();
         private readonly List<FileCompareGroup> _groupList = new();
 
+        internal void AddGroup(List<FileCompareGroup> group)
+        {
+            group.ForEach(item => AddGroup(item));
+        }
+
         internal void AddGroup(FileCompareGroup group)
         {
             int index = _groupList.Count();

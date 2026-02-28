@@ -49,9 +49,16 @@
             timerUpdate = new System.Windows.Forms.Timer(components);
             contextMenuStrip1 = new ContextMenuStrip(components);
             openToolStripMenuItem = new ToolStripMenuItem();
-            panel1 = new Panel();
-            splitContainer1 = new SplitContainer();
             openFolderToolStripMenuItem = new ToolStripMenuItem();
+            copyPathToolStripMenuItem = new ToolStripMenuItem();
+            removeFilesToolStripMenuItem = new ToolStripMenuItem();
+            compareFullHashToolStripMenuItem = new ToolStripMenuItem();
+            propertiesToolStripMenuItem = new ToolStripMenuItem();
+            panel1 = new Panel();
+            buttonRescan = new Button();
+            buttonRefresh = new Button();
+            splitContainer1 = new SplitContainer();
+            toolTip1 = new ToolTip(components);
             groupBox1.SuspendLayout();
             contextMenuStrip1.SuspendLayout();
             panel1.SuspendLayout();
@@ -70,7 +77,7 @@
             listViewResult.GridLines = true;
             listViewResult.Location = new Point(0, 0);
             listViewResult.Name = "listViewResult";
-            listViewResult.Size = new Size(1350, 314);
+            listViewResult.Size = new Size(1350, 635);
             listViewResult.TabIndex = 4;
             listViewResult.UseCompatibleStateImageBehavior = false;
             listViewResult.View = View.Details;
@@ -100,7 +107,7 @@
             buttonRemoveFiles.Name = "buttonRemoveFiles";
             buttonRemoveFiles.Size = new Size(241, 54);
             buttonRemoveFiles.TabIndex = 5;
-            buttonRemoveFiles.Text = "Remove selected files";
+            buttonRemoveFiles.Text = "Remove marked files";
             buttonRemoveFiles.UseVisualStyleBackColor = true;
             buttonRemoveFiles.Click += buttonRemoveFiles_Click;
             // 
@@ -109,14 +116,14 @@
             label1.AutoSize = true;
             label1.Location = new Point(6, 31);
             label1.Name = "label1";
-            label1.Size = new Size(198, 30);
+            label1.Size = new Size(190, 30);
             label1.TabIndex = 6;
-            label1.Text = "Selected files count:";
+            label1.Text = "Marked files count:";
             // 
             // label2
             // 
             label2.AutoSize = true;
-            label2.Location = new Point(149, 72);
+            label2.Location = new Point(141, 72);
             label2.Name = "label2";
             label2.Size = new Size(55, 30);
             label2.TabIndex = 7;
@@ -126,7 +133,7 @@
             // 
             labelFileSizeSelected.AutoSize = true;
             labelFileSizeSelected.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 204);
-            labelFileSizeSelected.Location = new Point(210, 72);
+            labelFileSizeSelected.Location = new Point(212, 72);
             labelFileSizeSelected.Name = "labelFileSizeSelected";
             labelFileSizeSelected.Size = new Size(25, 30);
             labelFileSizeSelected.TabIndex = 9;
@@ -170,7 +177,7 @@
             // 
             labelFileCountSelected.AutoSize = true;
             labelFileCountSelected.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 204);
-            labelFileCountSelected.Location = new Point(210, 31);
+            labelFileCountSelected.Location = new Point(212, 31);
             labelFileCountSelected.Name = "labelFileCountSelected";
             labelFileCountSelected.Size = new Size(25, 30);
             labelFileCountSelected.TabIndex = 12;
@@ -181,9 +188,9 @@
             label3.AutoSize = true;
             label3.Location = new Point(166, 13);
             label3.Name = "label3";
-            label3.Size = new Size(127, 30);
+            label3.Size = new Size(97, 30);
             label3.TabIndex = 13;
-            label3.Text = "Progressbar:";
+            label3.Text = "Progress:";
             // 
             // label4
             // 
@@ -220,19 +227,56 @@
             // contextMenuStrip1
             // 
             contextMenuStrip1.ImageScalingSize = new Size(28, 28);
-            contextMenuStrip1.Items.AddRange(new ToolStripItem[] { openToolStripMenuItem, openFolderToolStripMenuItem });
+            contextMenuStrip1.Items.AddRange(new ToolStripItem[] { openToolStripMenuItem, openFolderToolStripMenuItem, copyPathToolStripMenuItem, removeFilesToolStripMenuItem, compareFullHashToolStripMenuItem, propertiesToolStripMenuItem });
             contextMenuStrip1.Name = "contextMenuStrip1";
-            contextMenuStrip1.Size = new Size(271, 114);
+            contextMenuStrip1.Size = new Size(286, 220);
             // 
             // openToolStripMenuItem
             // 
             openToolStripMenuItem.Name = "openToolStripMenuItem";
-            openToolStripMenuItem.Size = new Size(270, 36);
+            openToolStripMenuItem.Size = new Size(285, 36);
             openToolStripMenuItem.Text = "Open";
             openToolStripMenuItem.Click += openToolStripMenuItem_Click;
             // 
+            // openFolderToolStripMenuItem
+            // 
+            openFolderToolStripMenuItem.Name = "openFolderToolStripMenuItem";
+            openFolderToolStripMenuItem.Size = new Size(285, 36);
+            openFolderToolStripMenuItem.Text = "Open Folder";
+            openFolderToolStripMenuItem.Click += openFolderToolStripMenuItem_Click;
+            // 
+            // copyPathToolStripMenuItem
+            // 
+            copyPathToolStripMenuItem.Name = "copyPathToolStripMenuItem";
+            copyPathToolStripMenuItem.Size = new Size(285, 36);
+            copyPathToolStripMenuItem.Text = "Copy Path";
+            copyPathToolStripMenuItem.Click += copyPathToolStripMenuItem_Click;
+            // 
+            // removeFilesToolStripMenuItem
+            // 
+            removeFilesToolStripMenuItem.Name = "removeFilesToolStripMenuItem";
+            removeFilesToolStripMenuItem.Size = new Size(285, 36);
+            removeFilesToolStripMenuItem.Text = "Remove selected files";
+            removeFilesToolStripMenuItem.Click += removeFilesToolStripMenuItem_Click;
+            // 
+            // compareFullHashToolStripMenuItem
+            // 
+            compareFullHashToolStripMenuItem.Name = "compareFullHashToolStripMenuItem";
+            compareFullHashToolStripMenuItem.Size = new Size(285, 36);
+            compareFullHashToolStripMenuItem.Text = "Compare Full Hash";
+            compareFullHashToolStripMenuItem.Click += compareFullHashToolStripMenuItem_Click;
+            // 
+            // propertiesToolStripMenuItem
+            // 
+            propertiesToolStripMenuItem.Name = "propertiesToolStripMenuItem";
+            propertiesToolStripMenuItem.Size = new Size(285, 36);
+            propertiesToolStripMenuItem.Text = "Properties";
+            propertiesToolStripMenuItem.Click += propertiesToolStripMenuItem_Click;
+            // 
             // panel1
             // 
+            panel1.Controls.Add(buttonRescan);
+            panel1.Controls.Add(buttonRefresh);
             panel1.Controls.Add(labelProgressBar);
             panel1.Controls.Add(labelSearchTime);
             panel1.Controls.Add(groupBox1);
@@ -242,8 +286,30 @@
             panel1.Dock = DockStyle.Fill;
             panel1.Location = new Point(0, 0);
             panel1.Name = "panel1";
-            panel1.Size = new Size(1350, 148);
+            panel1.Size = new Size(1350, 140);
             panel1.TabIndex = 17;
+            // 
+            // buttonRescan
+            // 
+            buttonRescan.Location = new Point(1142, 81);
+            buttonRescan.Name = "buttonRescan";
+            buttonRescan.Size = new Size(140, 47);
+            buttonRescan.TabIndex = 18;
+            buttonRescan.Text = "Re-Scan";
+            toolTip1.SetToolTip(buttonRescan, "Hashes re-check");
+            buttonRescan.UseVisualStyleBackColor = true;
+            buttonRescan.Click += buttonRescan_Click;
+            // 
+            // buttonRefresh
+            // 
+            buttonRefresh.Location = new Point(1142, 17);
+            buttonRefresh.Name = "buttonRefresh";
+            buttonRefresh.Size = new Size(140, 47);
+            buttonRefresh.TabIndex = 17;
+            buttonRefresh.Text = "Refresh";
+            toolTip1.SetToolTip(buttonRefresh, "Clears items which no longer present on disk");
+            buttonRefresh.UseVisualStyleBackColor = true;
+            buttonRefresh.Click += buttonRefresh_Click;
             // 
             // splitContainer1
             // 
@@ -261,30 +327,25 @@
             // 
             splitContainer1.Panel2.Controls.Add(panel1);
             splitContainer1.Panel2MinSize = 140;
-            splitContainer1.Size = new Size(1350, 466);
-            splitContainer1.SplitterDistance = 314;
+            splitContainer1.Size = new Size(1350, 779);
+            splitContainer1.SplitterDistance = 635;
             splitContainer1.TabIndex = 18;
             splitContainer1.SplitterMoved += splitContainer1_SplitterMoved;
-            // 
-            // openFolderToolStripMenuItem
-            // 
-            openFolderToolStripMenuItem.Name = "openFolderToolStripMenuItem";
-            openFolderToolStripMenuItem.Size = new Size(270, 36);
-            openFolderToolStripMenuItem.Text = "Open Folder";
-            openFolderToolStripMenuItem.Click += openFolderToolStripMenuItem_Click;
             // 
             // FormResults
             // 
             AutoScaleDimensions = new SizeF(12F, 30F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(1350, 466);
+            ClientSize = new Size(1350, 779);
             Controls.Add(splitContainer1);
             Icon = (Icon)resources.GetObject("$this.Icon");
+            KeyPreview = true;
             Name = "FormResults";
             StartPosition = FormStartPosition.CenterParent;
             Text = "Results";
             FormClosing += FormResults_FormClosing;
             Shown += FormResults_Shown;
+            KeyDown += FormResults_KeyDown;
             groupBox1.ResumeLayout(false);
             groupBox1.PerformLayout();
             contextMenuStrip1.ResumeLayout(false);
@@ -321,5 +382,12 @@
         private Panel panel1;
         private SplitContainer splitContainer1;
         private ToolStripMenuItem openFolderToolStripMenuItem;
+        private ToolStripMenuItem removeFilesToolStripMenuItem;
+        private Button buttonRescan;
+        private Button buttonRefresh;
+        private ToolTip toolTip1;
+        private ToolStripMenuItem copyPathToolStripMenuItem;
+        private ToolStripMenuItem compareFullHashToolStripMenuItem;
+        private ToolStripMenuItem propertiesToolStripMenuItem;
     }
 }

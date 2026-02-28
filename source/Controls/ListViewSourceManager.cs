@@ -11,7 +11,9 @@ namespace DuplicatesFinder
     {
         const string CONTENT_TYPE_FILE = "file";
         const string CONTENT_TYPE_DIR = "<Dir>";
-        ListView _lv;
+
+        private ListView _lv;
+        private HashSet<string> _cachedList = new();
 
         public ListViewSourceManager(ListView listView)
         {
@@ -25,14 +27,17 @@ namespace DuplicatesFinder
             return _lv;
         }
         
-        public void Add(string path, bool isChecked = true)
+        public bool Add(string path, bool isChecked = true)
         {
+            if (_cachedList.Contains(path))
+                return false;
+
             bool isFile = File.Exists(path);
             bool isDirectory = Directory.Exists(path);
 
             if (!isFile && !isDirectory)
             {
-                return;
+                return false;
             }
 
             ListViewItem lvi = new ListViewItem(new string[]{ path, isFile ? CONTENT_TYPE_FILE : CONTENT_TYPE_DIR, "", "" });
@@ -41,6 +46,8 @@ namespace DuplicatesFinder
                 lvi.Checked = true;
             }
             _lv.Items.Add(lvi);
+            _cachedList.Add(path);
+            return true;
         }
 
         public void Add_AsInvoke(string path, bool isChecked = true)
@@ -51,6 +58,7 @@ namespace DuplicatesFinder
         public void Clear()
         {
             _lv.Items.Clear();
+            _cachedList.Clear();
         }
 
         public string? GetSelectedPath()
@@ -69,19 +77,24 @@ namespace DuplicatesFinder
             return _lv.SelectedItems[0].Index;
         }
 
-        public void RemoveItem(int index)
+        public void Remove(int index)
         {
+            Cached_TryRemove(_lv.Items[index].Text);
             _lv.Items.RemoveAt(index);
         }
 
-        private void UpdateDuplicateCount(int index, int count)
+        public void Remove(ListViewItem item)
         {
-            _lv.Items[index].SubItems[1].Text = count.ToString();
+            Cached_TryRemove(item.Text);
+            _lv.Items.Remove(item);
         }
 
-        private void UpdateDuplicateSize(int index, int count)
+        private void Cached_TryRemove(string path)
         {
-            _lv.Items[index].SubItems[2].Text = count.ToString();
+            if (_cachedList.Contains(path))
+            {
+                _cachedList.Remove(path);
+            }
         }
 
         public int Count
@@ -90,11 +103,6 @@ namespace DuplicatesFinder
             {
                 return _lv.Items.Count;
             }
-        }
-
-        public void RemoveAll()
-        {
-            _lv.Items.Clear();
         }
 
     }

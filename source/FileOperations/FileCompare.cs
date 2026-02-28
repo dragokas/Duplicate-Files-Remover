@@ -10,30 +10,30 @@ using System.Threading.Tasks;
 
 namespace DuplicatesFinder
 {
-    internal enum FileCompareAlgorithm
+    public enum FileCompareAlgorithm
     {
         ByHash,     // XXH3 hash of entire file
         ByLastBytes // XXH3 hash of the last few bytes of the file
     }
 
-    internal class FileCompareMethod
+    public class FileCompareMethod
     {
-        internal FileCompareAlgorithm Algorithm;
-        internal int NumLastBytes;
+        public FileCompareAlgorithm Algorithm;
+        public int NumLastBytes;
 
-        internal FileCompareMethod(FileCompareAlgorithm algorithm, int numLastBytes = 0)
+        public FileCompareMethod(FileCompareAlgorithm algorithm, int numLastBytes = 0)
         {
             Algorithm = algorithm;
             NumLastBytes = numLastBytes;
         }
     }
 
-    internal class FileCompareGroup
+    public class FileCompareGroup
     {
-        internal List<FileCompareMetadata> MetadataList = new();
+        public List<FileCompareMetadata> MetadataList = new();
 
-        internal FileCompareGroup() { }
-        internal FileCompareGroup(FileCompareMetadata metadata)
+        public FileCompareGroup() { }
+        public FileCompareGroup(FileCompareMetadata metadata)
         {
             MetadataList.Add(metadata);
         }

@@ -144,7 +144,7 @@ namespace DuplicatesFinder
         {
             foreach (ListViewItem item in _lv.SelectedItems)
             {
-                _lv.Items.Remove(item);
+                _sourceList.Remove(item);
             }
         }
 
@@ -164,7 +164,6 @@ namespace DuplicatesFinder
                 }
             }
         }
-
 
     }
 }

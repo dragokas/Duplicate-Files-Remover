@@ -89,7 +89,7 @@ namespace DuplicatesFinder.Common
         [DllImport("user32.dll")]
         static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
 
-        [DllImport("user32.dll", SetLastError = true)]
+        [DllImport("user32.dll", CharSet = CharSet.Unicode)]
         private static extern IntPtr CreateWindowEx(
             int dwExStyle,
             string lpClassName,
@@ -104,13 +104,13 @@ namespace DuplicatesFinder.Common
             IntPtr hInstance,
             IntPtr lpParam);
 
-        [DllImport("user32.dll", SetLastError = true)]
+        [DllImport("user32.dll")]
         private static extern ushort RegisterClassEx(ref WNDCLASSEX lpwcx);
 
         [DllImport("user32.dll")]
         private static extern IntPtr DefWindowProc(IntPtr hWnd, uint msg, IntPtr wParam, IntPtr lParam);
 
-        [StructLayout(LayoutKind.Sequential)]
+        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
         private struct WNDCLASSEX
         {
             public uint cbSize;
@@ -140,6 +140,8 @@ namespace DuplicatesFinder.Common
 
         public event Action<string>? FileDropped;
 
+        private WndProcDelegate _wndProcCallback;
+
         internal DragDropOverlay(Form form, string labelTipText)
         {
             if (IsProcessElevated())
@@ -147,6 +149,7 @@ namespace DuplicatesFinder.Common
                 form.AllowDrop = false; // AllowDrop option conflicts with DragAcceptFiles on Win32 window!
             }
             _labelTipText = labelTipText;
+            _wndProcCallback = OverlayWndProc;
         }
 
         internal IntPtr CreateOverlayWindow(IntPtr parentHandle, int x, int y, int width, int height)
@@ -154,7 +157,7 @@ namespace DuplicatesFinder.Common
             WNDCLASSEX wndClass = new WNDCLASSEX
             {
                 cbSize = (uint)Marshal.SizeOf(typeof(WNDCLASSEX)),
-                lpfnWndProc = OverlayWndProc,
+                lpfnWndProc = _wndProcCallback,
                 lpszClassName = "OverlayWin32Window",
                 hbrBackground = IntPtr.Zero, // manual re-draw
                 hCursor = IntPtr.Zero,

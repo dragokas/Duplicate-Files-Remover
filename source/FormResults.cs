@@ -7,29 +7,47 @@ namespace DuplicatesFinder
 {
     public partial class FormResults : Form
     {
-        private List<string> _pathList;
+        private ListViewResultManager _lvManager;
+        private SortedGroupList _groupList;
+        private List<string> _pathListToCompare;
         private FileCompareMethod _fileCompareMethod;
         private bool _isCancelled = false;
         private bool _isFinishedScanning = false;
         private bool _isFinishedUpdate = false;
         private readonly ConcurrentQueue<List<FileCompareGroup>> _updateQueue = new();
-        private readonly OptimizedGroupList _cachedGroupList = new();
         private ProgressBarData _progressBarData;
         private ElapsedTimeWatcher _elapsedTimeWatcher;
 
         internal FormResults(List<string> pathList, FileCompareMethod fileCompareMethod)
         {
             InitializeComponent();
+            ResizeSplitter();
             ResizePathColumnWidth();
-            _pathList = pathList;
+            _groupList = new();
+            _lvManager = new(listViewResult, _groupList);
+            _pathListToCompare = pathList;
             _fileCompareMethod = fileCompareMethod;
             _progressBarData = new(labelProgressBar);
             _elapsedTimeWatcher = new(labelSearchTime);
             timerUpdate.Enabled = true;
+            ListView.CheckForIllegalCrossThreadCalls = true;
+            Form.CheckForIllegalCrossThreadCalls = true;
+            Control.CheckForIllegalCrossThreadCalls = true;
         }
 
         private void FormResults_Shown(object sender, EventArgs e)
         {
+            ReScan();
+        }
+
+        private void ReScan()
+        {
+            _groupList.Clear();
+            UpdateSelectedFilesReport();
+            buttonCancelSearch.Enabled = true;
+            buttonRescan.Enabled = false;
+            buttonRefresh.Enabled = false;
+            buttonRemoveFiles.Enabled = false;
             Task.Run(() => StartSearch());
         }
 
@@ -42,7 +60,7 @@ namespace DuplicatesFinder
             _elapsedTimeWatcher.Reset();
             _elapsedTimeWatcher.Start();
 
-            await SearchEngineManager.Search(_pathList);
+            await SearchEngineManager.Search(_pathListToCompare);
 
             List<long> uniqueSizesList = Globals.DB.GetUniqueSizes();
 
@@ -70,32 +88,6 @@ namespace DuplicatesFinder
             this.BeginInvoke(() => ConsumeWorkResults());
         }
 
-        private void AppendGroupToResult(FileCompareGroup fileGroup)
-        {
-            bool isFirstItem = true;
-            ListViewGroup lvGroup = new(CreateGroupName(fileGroup));
-            listViewResult.Groups.Add(lvGroup);
-
-            for (int i = fileGroup.MetadataList.Count - 1; i >= 0; i--)
-            {
-                FileCompareMetadata meta = fileGroup.MetadataList[i];
-
-                ListViewItem lvi = new(meta.FilePath.Substring(4), lvGroup); // remove "\\?\"
-                lvi.SubItems.Add(fileGroup.MetadataList.Count.ToString());
-                lvi.SubItems.Add(meta.Size.ToString());
-                lvi.Checked = !isFirstItem;
-
-                listViewResult.Items.Add(lvi);
-                isFirstItem = false;
-            }
-        }
-
-        private string CreateGroupName(FileCompareGroup fileGroup)
-        {
-            var firstFileMetadata = fileGroup.MetadataList[0];
-            return $"({FileSizeFormatter.Format(firstFileMetadata.Size)}) {firstFileMetadata.FileName}";
-        }
-
         private void buttonCancelSearch_Click(object sender, EventArgs e)
         {
             Globals.SearchThreadMan.CancelTasks();
@@ -105,50 +97,35 @@ namespace DuplicatesFinder
 
         private void buttonRemoveFiles_Click(object sender, EventArgs e)
         {
-            List<string> selectedPathList = listViewResult.CheckedItems.Cast<ListViewItem>()
-                .Select(item => item.Text)
-                .ToList();
+            AskRemoveFiles(listViewResult.CheckedItems.Cast<ListViewItem>().Select(x => x.Text).ToList());
+        }
 
-            int countSuccess = 0;
-            int countFailed = 0;
+        private void AskRemoveFiles(List<string> paths)
+        {
             bool toRecycleBin = checkBoxRecycleBin.Checked;
 
-            if (MessageBox.Show($"Remove {selectedPathList.Count} files " +
-                (toRecycleBin ? "to Recycle bin?" : "completely?"), 
+            if (MessageBox.Show($"Remove {paths.Count} file(s) " + (toRecycleBin ? "to Recycle bin?" : "completely?"),
                 "", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.No)
             {
                 return;
             }
 
-            foreach (var filePath in selectedPathList)
+            int countSuccess = 0;
+            int countFailed = 0;
+
+            _groupList.BeginRemove();
+            foreach (var filePath in paths)
             {
                 if (FileRemover.RemoveFile(filePath, toRecycleBin))
                 {
                     countSuccess++;
-                    _cachedGroupList.RemoveItemFromGroup(filePath);
+                    _groupList.RemoveItemByPath(filePath);
                 }
             }
-            countFailed = selectedPathList.Count - countSuccess;
+            _groupList.EndRemove();
+            countFailed = paths.Count - countSuccess;
 
             MessageBox.Show($"Success removed: {countSuccess}\nFailures: {countFailed}", Globals.AppName, MessageBoxButtons.OK, MessageBoxIcon.Information);
-            RefreshListViewFromCache();
-        }
-
-        private void RefreshListViewFromCache()
-        {
-            var pairedGroups = _cachedGroupList.GetPairedGroupList();
-            _cachedGroupList.Clear();
-
-            listViewResult.BeginUpdate();
-            listViewResult.Items.Clear();
-
-            foreach (var group in pairedGroups)
-            {
-                AppendGroupToResult(group);
-                _cachedGroupList.AddGroup(group);
-            }
-
-            listViewResult.EndUpdate();
             UpdateSelectedFilesReport();
         }
 
@@ -178,32 +155,39 @@ namespace DuplicatesFinder
         {
             if (_updateQueue.Count() > 0)
             {
-                listViewResult.BeginUpdate();
-
-                while (_updateQueue.TryDequeue(out var groupList))
+                try
                 {
-                    foreach (var group in groupList)
+                    listViewResult.BeginUpdate();
+
+                    while (_updateQueue.TryDequeue(out var groupList))
                     {
-                        AppendGroupToResult(group);
-                        _cachedGroupList.AddGroup(group);
+                        foreach (var group in groupList)
+                        {
+                            _groupList.Add(group);
+                        }
                     }
                 }
-
-                listViewResult.EndUpdate();
-            }
-            else
-            {
-                if (_isFinishedScanning)
+                catch (Exception ex)
                 {
-                    timerUpdate.Enabled = false;
-                    buttonCancelSearch.Enabled = false;
-                    _isFinishedUpdate = true;
-                    UpdateSelectedFilesReport();
-
-                    if (listViewResult.Groups.Count == 0)
-                    {
-                        MessageBox.Show("No duplicates found!", Globals.AppName, MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    }
+                    Globals.ReportError(ex);
+                }
+                finally
+                {
+                    listViewResult.EndUpdate();
+                }
+            }
+            if (_isFinishedScanning)
+            {
+                timerUpdate.Enabled = false;
+                buttonCancelSearch.Enabled = false;
+                buttonRescan.Enabled = true;
+                buttonRefresh.Enabled = true;
+                buttonRemoveFiles.Enabled = true;
+                _isFinishedUpdate = true;
+                UpdateSelectedFilesReport();
+                if (listViewResult.Groups.Count == 0)
+                {
+                    MessageBox.Show("No duplicates found!", Globals.AppName, MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
             }
             _elapsedTimeWatcher.Print();
@@ -231,28 +215,62 @@ namespace DuplicatesFinder
                 Shell.OpenFolder(Directory.GetParent(path)?.FullName);
             }
         }
+        private void copyPathToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            CopyPath();
+        }
+        private void CopyPath()
+        {
+            if (listViewResult.SelectedItems.Count != 0)
+                Clipboard.SetText(String.Join('\n', listViewResult.SelectedItems.Cast<ListViewItem>().Select(x => x.Text).ToList()));
+        }
+        private void removeFilesToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            AskRemoveFiles(listViewResult.SelectedItems.Cast<ListViewItem>().Select(x => x.Text).ToList());
+        }
+        private void compareFullHashToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            CompareFullHash();
+        }
+        private void propertiesToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (listViewResult.SelectedItems.Count != 0)
+                Shell.OpenProperties(listViewResult.SelectedItems[0].Text);
+        }
 
         private void listViewResult_MouseUp(object sender, MouseEventArgs e)
         {
+            if (!_isFinishedUpdate)
+                return;
+
             if (e.Button == MouseButtons.Right)
             {
-                ListViewItem? item = listViewResult.GetItemAt(e.X, e.Y);
-
-                if (item != null)
+                if (listViewResult.SelectedItems.Count == 0)
                 {
-                    listViewResult.SelectedItems.Clear();
-                    item.Selected = true;
-
-                    Point screenPoint = listViewResult.PointToScreen(e.Location); // consider DPI
-                    contextMenuStrip1.Show(screenPoint);
+                    ListViewItem? item = listViewResult.GetItemAt(e.X, e.Y);
+                    if (item != null)
+                    {
+                        listViewResult.SelectedItems.Clear();
+                        item.Selected = true;
+                        Point screenPoint = listViewResult.PointToScreen(e.Location); // consider DPI
+                        contextMenuStrip1.Show(screenPoint);
+                    }
+                }
+                else
+                {
+                    contextMenuStrip1.Show(Cursor.Position);
                 }
             }
         }
-
         private void splitContainer1_SplitterMoved(object sender, SplitterEventArgs e)
         {
-            Geometry.LimitContainerPanel2MaxSize(splitContainer1, splitContainer1.Panel2MinSize);
+            ResizeSplitter();
             ResizePathColumnWidth();
+        }
+
+        private void ResizeSplitter()
+        {
+            Geometry.LimitContainerPanel2MaxSize(splitContainer1, splitContainer1.Panel2MinSize);
         }
 
         private void ResizePathColumnWidth()
@@ -266,7 +284,92 @@ namespace DuplicatesFinder
                 listViewResult.Width - (allColumnsWidth - listViewResult.Columns[0].Width) - SystemInformation.VerticalScrollBarWidth;
         }
 
-        
-    }
+        private void buttonRefresh_Click(object sender, EventArgs e)
+        {
+            _groupList.BeginRemove();
+            foreach (var filePath in listViewResult.Items.Cast<ListViewItem>().Select(x => x.Text).ToList())
+            {
+                if (!File.Exists(filePath))
+                {
+                    _groupList.RemoveItemByPath(filePath);
+                }
+            }
+            _groupList.EndRemove();
+            UpdateSelectedFilesReport();
+        }
 
+        private void buttonRescan_Click(object sender, EventArgs e)
+        {
+            ReScan();
+        }
+
+        private void FormResults_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Modifiers == Keys.Control)
+            {
+                if (e.KeyCode == Keys.C || e.KeyCode == Keys.Insert)
+                {
+                    CopyPath();
+                    e.Handled = true;
+                }
+                else if (e.KeyCode == Keys.A)
+                {
+                    _lvManager.SelectAll();
+                    e.Handled = true;
+                }
+            }
+        }
+
+        private void CompareFullHash()
+        {
+            _isFinishedUpdate = false;
+            int numTotalMismatches = 0;
+            int numTotalMatches = 0;
+            int numTotalInitialMatches = 0;
+            int numSeparateGroups = 0;
+            FileCompareMethod compareMethod = new(FileCompareAlgorithm.ByHash);
+            var selectedGroups = _lvManager.GetSelectedGroups();
+            foreach (var group in selectedGroups)
+            {
+                var items = _lvManager.GetGroupItems(group);
+                var paths = items.Select(x => x.Text).ToList();
+                var newGroupList = new FileCompare(compareMethod).GetIdenticalFileGroups(paths);
+                numTotalInitialMatches += items.Count;
+
+                if (newGroupList == null || newGroupList.Count != 1 || newGroupList[0].MetadataList.Count != items.Count)
+                {
+                    _groupList.RemoveAt(_lvManager.GetGroupIndex(group));
+
+                    if (newGroupList != null)
+                    {
+                        int numMatches = 0;
+                        newGroupList.ForEach(g => numMatches += g.MetadataList.Count);
+                        numTotalMismatches += (items.Count - numMatches);
+                        numTotalMatches += numMatches;
+
+                        if (newGroupList.Count > 1)
+                        {
+                            numSeparateGroups += newGroupList.Count - 1;
+                        }
+                        newGroupList?.ForEach(g => _groupList.Add(g));
+                    }
+                }
+            }
+            _isFinishedUpdate = true;
+            UpdateSelectedFilesReport();
+
+            if (numTotalMismatches > 0)
+            {
+                MessageBox.Show($"{numTotalMismatches} of {numTotalInitialMatches} file hashes mismatched and dropped from the list", "", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            else if (numSeparateGroups > 0)
+            {
+                MessageBox.Show($"Full match of {numTotalMatches} files confirmed, " +
+                    $"however few files splitted into {numSeparateGroups} new group(s)", "", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            else {
+                MessageBox.Show($"Full match of {numTotalMatches} files confirmed.", "", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+        }
+    }
 }
