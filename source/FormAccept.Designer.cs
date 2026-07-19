@@ -34,6 +34,7 @@
             listViewSource = new ListView();
             columnHeaderPath = new ColumnHeader();
             columnHeaderType = new ColumnHeader();
+            columnHeaderProtected = new ColumnHeader();
             groupBox1 = new GroupBox();
             checkBoxMatchExtensions = new CheckBox();
             label1 = new Label();
@@ -49,7 +50,9 @@
             contextMenuStrip1 = new ContextMenuStrip(components);
             openToolStripMenuItem = new ToolStripMenuItem();
             deleteFromListToolStripMenuItem = new ToolStripMenuItem();
+            protectFromDeletionToolStripMenuItem = new ToolStripMenuItem();
             toolTip1 = new ToolTip(components);
+            checkBoxMarkFirstItem = new CheckBox();
             groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)numericUpDownNumBytesToCompare).BeginInit();
             panel1.SuspendLayout();
@@ -67,7 +70,7 @@
             // 
             // buttonSearch
             // 
-            buttonSearch.Location = new Point(73, 272);
+            buttonSearch.Location = new Point(72, 335);
             buttonSearch.Name = "buttonSearch";
             buttonSearch.Size = new Size(162, 70);
             buttonSearch.TabIndex = 2;
@@ -78,7 +81,7 @@
             // listViewSource
             // 
             listViewSource.CheckBoxes = true;
-            listViewSource.Columns.AddRange(new ColumnHeader[] { columnHeaderPath, columnHeaderType });
+            listViewSource.Columns.AddRange(new ColumnHeader[] { columnHeaderPath, columnHeaderType, columnHeaderProtected });
             listViewSource.Dock = DockStyle.Fill;
             listViewSource.FullRowSelect = true;
             listViewSource.GridLines = true;
@@ -93,7 +96,7 @@
             // columnHeaderPath
             // 
             columnHeaderPath.Text = "Path";
-            columnHeaderPath.Width = 700;
+            columnHeaderPath.Width = 600;
             // 
             // columnHeaderType
             // 
@@ -101,8 +104,15 @@
             columnHeaderType.TextAlign = HorizontalAlignment.Center;
             columnHeaderType.Width = 80;
             // 
+            // columnHeaderProtected
+            // 
+            columnHeaderProtected.Text = "Protected";
+            columnHeaderProtected.TextAlign = HorizontalAlignment.Center;
+            columnHeaderProtected.Width = 120;
+            // 
             // groupBox1
             // 
+            groupBox1.Controls.Add(checkBoxMarkFirstItem);
             groupBox1.Controls.Add(checkBoxMatchExtensions);
             groupBox1.Controls.Add(label1);
             groupBox1.Controls.Add(numericUpDownNumBytesToCompare);
@@ -111,7 +121,7 @@
             groupBox1.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 204);
             groupBox1.Location = new Point(7, 3);
             groupBox1.Name = "groupBox1";
-            groupBox1.Size = new Size(303, 232);
+            groupBox1.Size = new Size(303, 282);
             groupBox1.TabIndex = 4;
             groupBox1.TabStop = false;
             groupBox1.Text = "Compare method";
@@ -119,10 +129,8 @@
             // checkBoxMatchExtensions
             // 
             checkBoxMatchExtensions.AutoSize = true;
-            checkBoxMatchExtensions.Checked = true;
-            checkBoxMatchExtensions.CheckState = CheckState.Checked;
             checkBoxMatchExtensions.Font = new Font("Segoe UI", 9F, FontStyle.Regular, GraphicsUnit.Point, 204);
-            checkBoxMatchExtensions.Location = new Point(19, 183);
+            checkBoxMatchExtensions.Location = new Point(19, 227);
             checkBoxMatchExtensions.Name = "checkBoxMatchExtensions";
             checkBoxMatchExtensions.Size = new Size(269, 34);
             checkBoxMatchExtensions.TabIndex = 4;
@@ -257,23 +265,41 @@
             // contextMenuStrip1
             // 
             contextMenuStrip1.ImageScalingSize = new Size(28, 28);
-            contextMenuStrip1.Items.AddRange(new ToolStripItem[] { openToolStripMenuItem, deleteFromListToolStripMenuItem });
+            contextMenuStrip1.Items.AddRange(new ToolStripItem[] { openToolStripMenuItem, deleteFromListToolStripMenuItem, protectFromDeletionToolStripMenuItem });
             contextMenuStrip1.Name = "contextMenuStrip1";
-            contextMenuStrip1.Size = new Size(229, 76);
+            contextMenuStrip1.Size = new Size(339, 112);
             // 
             // openToolStripMenuItem
             // 
             openToolStripMenuItem.Name = "openToolStripMenuItem";
-            openToolStripMenuItem.Size = new Size(228, 36);
+            openToolStripMenuItem.Size = new Size(338, 36);
             openToolStripMenuItem.Text = "Open";
             openToolStripMenuItem.Click += openToolStripMenuItem_Click;
             // 
             // deleteFromListToolStripMenuItem
             // 
             deleteFromListToolStripMenuItem.Name = "deleteFromListToolStripMenuItem";
-            deleteFromListToolStripMenuItem.Size = new Size(228, 36);
-            deleteFromListToolStripMenuItem.Text = "Delete from list";
+            deleteFromListToolStripMenuItem.Size = new Size(338, 36);
+            deleteFromListToolStripMenuItem.Text = "Remove from list";
             deleteFromListToolStripMenuItem.Click += deleteFromListToolStripMenuItem_Click;
+            // 
+            // protectFromDeletionToolStripMenuItem
+            // 
+            protectFromDeletionToolStripMenuItem.Name = "protectFromDeletionToolStripMenuItem";
+            protectFromDeletionToolStripMenuItem.Size = new Size(338, 36);
+            protectFromDeletionToolStripMenuItem.Text = "Protect from Deletion mark";
+            protectFromDeletionToolStripMenuItem.Click += protectFromDeletionToolStripMenuItem_Click;
+            // 
+            // checkBoxMarkFirstItem
+            // 
+            checkBoxMarkFirstItem.AutoSize = true;
+            checkBoxMarkFirstItem.Font = new Font("Segoe UI", 9F, FontStyle.Regular, GraphicsUnit.Point, 204);
+            checkBoxMarkFirstItem.Location = new Point(19, 187);
+            checkBoxMarkFirstItem.Name = "checkBoxMarkFirstItem";
+            checkBoxMarkFirstItem.Size = new Size(279, 34);
+            checkBoxMarkFirstItem.TabIndex = 5;
+            checkBoxMarkFirstItem.Text = "Mark 1st item for deletion";
+            checkBoxMarkFirstItem.UseVisualStyleBackColor = true;
             // 
             // FormAccept
             // 
@@ -329,5 +355,8 @@
         private CheckBox checkBoxMatchExtensions;
         private ToolTip toolTip1;
         private PictureBox pictureBoxDropFiles;
+        private ColumnHeader columnHeaderProtected;
+        private ToolStripMenuItem protectFromDeletionToolStripMenuItem;
+        private CheckBox checkBoxMarkFirstItem;
     }
 }

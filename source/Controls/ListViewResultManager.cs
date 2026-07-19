@@ -11,12 +11,20 @@ namespace DuplicatesFinder
     {
         private ListView _lv;
         private SortedGroupList _resultList = new();
+        private bool _markFirstItemForDeletion;
+        private List<string> _protectedPaths;
 
-        public ListViewResultManager(ListView listview, SortedGroupList resultList)
+        public ListViewResultManager(
+            ListView listview, 
+            SortedGroupList resultList, 
+            bool markFirstItemForDeletion,
+            List<string> protectedPaths)
         {
             _lv = listview;
             _lv.ColumnClick += _lv_ColumnClick;
             _resultList = resultList;
+            _protectedPaths = protectedPaths;
+            _markFirstItemForDeletion = markFirstItemForDeletion;
             _resultList.ListChanged += SourceList_ListChanged;
             _resultList.SortDirectionChanged += _resultList_SortDirectionChanged;
             _resultList.SortFieldChanged += _resultList_SortFieldChanged;
@@ -101,19 +109,59 @@ namespace DuplicatesFinder
 
         internal ListViewGroup CreateListViewGroup(FileCompareGroup fileGroup)
         {
-            bool isFirstItem = true;
+            int numItem = 0;
             ListViewGroup lvGroup = new(CreateGroupName(fileGroup));
+
+            List<ListViewItem> itemsToAdd = new();
+            bool hasProtectedItems = false;
+            bool isAnyOneChecked = false;
 
             foreach (var meta in fileGroup.MetadataList.OrderByDescending(x => x.FilePath))
             {
                 ListViewItem lvi = new(meta.FilePath.Substring(4), lvGroup); // remove "\\?\"
                 lvi.SubItems.Add(fileGroup.MetadataList.Count.ToString());
                 lvi.SubItems.Add(meta.Size.ToString());
-                lvi.Checked = !isFirstItem;
 
-                _lv.Items.Add(lvi);
-                isFirstItem = false;
+                if (IsPathProtectedFromDeletion(meta.FilePath))
+                {
+                    lvi.Checked = false;
+                    hasProtectedItems = true;
+                }
+                else
+                {
+                    if (_markFirstItemForDeletion)
+                    {
+                        if (numItem != 1) // mark all, except the 2nd item
+                        {
+                            lvi.Checked = true;
+                            isAnyOneChecked = true;
+                        }
+                    }
+                    else
+                    {
+                        if (numItem != 0) // mark all, except the 1st item
+                        {
+                            lvi.Checked = true;
+                            isAnyOneChecked = true;
+                        }
+                    }
+                }
+                itemsToAdd.Add(lvi);
+                ++numItem;
             }
+
+            if (!isAnyOneChecked && hasProtectedItems)
+            {
+                foreach (var item in itemsToAdd)
+                {
+                    if (!IsPathProtectedFromDeletion(item.Text))
+                    {
+                        item.Checked = true;
+                    }
+                }
+            }
+
+            _lv.Items.AddRange(itemsToAdd.ToArray());
             return lvGroup;
         }
 
@@ -161,5 +209,26 @@ namespace DuplicatesFinder
             return _lv.Groups.IndexOf(group);
         }
 
+        internal bool IsPathProtectedFromDeletion(string path)
+        {
+            foreach (var entry in _protectedPaths)
+            {
+                if (path.StartsWith(@"\\?\"))
+                {
+                    if (path.Length > 4 && path.AsSpan(4).StartsWith(entry))
+                    {
+                        return true;
+                    }
+                }
+                else
+                {
+                    if (path.StartsWith(entry))
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
     }
 }

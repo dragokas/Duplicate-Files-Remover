@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -9,11 +10,18 @@ namespace DuplicatesFinder
 {
     internal class ListViewSourceManager
     {
-        const string CONTENT_TYPE_FILE = "file";
+        const string CONTENT_TYPE_FILE = "File";
         const string CONTENT_TYPE_DIR = "<Dir>";
 
+        enum LvColumnIndex
+        {
+            Path = 0,
+            Type = 1,
+            Protected = 2
+        }
+
         private ListView _lv;
-        private HashSet<string> _cachedList = new();
+        private HashSet<SourceEntry> _cachedList = new();
 
         public ListViewSourceManager(ListView listView)
         {
@@ -32,21 +40,33 @@ namespace DuplicatesFinder
             if (_cachedList.Contains(path))
                 return false;
 
+            bool isDirectory = false;
             bool isFile = File.Exists(path);
-            bool isDirectory = Directory.Exists(path);
 
-            if (!isFile && !isDirectory)
+            if (!isFile)
             {
-                return false;
+                isDirectory = Directory.Exists(path);
+                if (!isDirectory)
+                {
+                    return false;
+                }
             }
 
-            ListViewItem lvi = new ListViewItem(new string[]{ path, isFile ? CONTENT_TYPE_FILE : CONTENT_TYPE_DIR, "", "" });
+            ListViewItem lvi = new ListViewItem(new string[]{ path, "", "" });
             if (isChecked)
             {
                 lvi.Checked = true;
             }
+            lvi.SubItems[(int)LvColumnIndex.Type].Text = isFile ? CONTENT_TYPE_FILE : CONTENT_TYPE_DIR;
+            UpdateProtected(lvi, false);
             _lv.Items.Add(lvi);
-            _cachedList.Add(path);
+
+            SourceEntry sourceEntry = new(path);
+            sourceEntry.IsDirectory = isDirectory;
+            _cachedList.Add(sourceEntry);
+
+            lvi.Tag = sourceEntry;
+
             return true;
         }
 
@@ -91,17 +111,45 @@ namespace DuplicatesFinder
 
         private void Cached_TryRemove(string path)
         {
-            if (_cachedList.Contains(path))
+            if (_cachedList.TryGetValue(path, out var entry))
             {
-                _cachedList.Remove(path);
+                _cachedList.Remove(entry);
             }
+        }
+
+        public void UpdateProtected(ListViewItem item, bool isProtected)
+        {
+            item.SubItems[(int)LvColumnIndex.Protected].Text = isProtected ? "Yes" : "No";
+            if (TryGetSourceEntry(item, out var entry))
+            { 
+                entry.IsProtected = isProtected;
+            }
+        }
+
+        public bool TryGetSourceEntry(ListViewItem item, [MaybeNullWhen(false)] out SourceEntry entry)
+        {
+            return _cachedList.TryGetValue(item.Text, out entry);
+        }
+
+        public bool TryGetSourceEntryListChecked([MaybeNullWhen(false)] out List<SourceEntry> entryList)
+        {
+            entryList = _lv.CheckedItems.Cast<ListViewItem>()
+                .Select(item => item.Tag)
+                .OfType<SourceEntry>()
+                .ToList();
+            if (entryList.Count == 0)
+            {
+                entryList = null;
+                return false;
+            }
+            return true;
         }
 
         public int Count
         {
             get
             {
-                return _lv.Items.Count;
+                return _cachedList.Count;
             }
         }
 

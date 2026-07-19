@@ -21,6 +21,7 @@ namespace DuplicatesFinder
         public FileCompareAlgorithm Algorithm;
         public int NumLastBytes;
 
+        public FileCompareMethod() { }
         public FileCompareMethod(FileCompareAlgorithm algorithm, int numLastBytes = 0)
         {
             Algorithm = algorithm;

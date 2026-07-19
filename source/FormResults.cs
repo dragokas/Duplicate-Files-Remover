@@ -9,8 +9,7 @@ namespace DuplicatesFinder
     {
         private ListViewResultManager _lvManager;
         private SortedGroupList _groupList;
-        private List<string> _pathListToCompare;
-        private FileCompareMethod _fileCompareMethod;
+        private SearchSettings _searchSettings;
         private bool _isCancelled = false;
         private bool _isFinishedScanning = false;
         private bool _isFinishedUpdate = false;
@@ -18,20 +17,19 @@ namespace DuplicatesFinder
         private ProgressBarData _progressBarData;
         private ElapsedTimeWatcher _elapsedTimeWatcher;
 
-        internal FormResults(List<string> pathList, FileCompareMethod fileCompareMethod)
+        internal FormResults(SearchSettings searchSettings)
         {
             InitializeComponent();
             ResizeSplitter();
             ResizePathColumnWidth();
+            _searchSettings = searchSettings;
             _groupList = new();
-            _lvManager = new(listViewResult, _groupList);
-            _pathListToCompare = pathList;
-            _fileCompareMethod = fileCompareMethod;
+            List<string> protectedPaths = _searchSettings.ListToCompare
+                .Where(x => x.IsProtected).Select(x => x.Path).ToList();
+            _lvManager = new(listViewResult, _groupList, _searchSettings.MarkFirstItem, protectedPaths);
             _progressBarData = new(labelProgressBar);
             _elapsedTimeWatcher = new(labelSearchTime);
             timerUpdate.Enabled = true;
-            ListView.CheckForIllegalCrossThreadCalls = true;
-            Form.CheckForIllegalCrossThreadCalls = true;
             Control.CheckForIllegalCrossThreadCalls = true;
         }
 
@@ -60,7 +58,8 @@ namespace DuplicatesFinder
             _elapsedTimeWatcher.Reset();
             _elapsedTimeWatcher.Start();
 
-            await SearchEngineManager.Search(_pathListToCompare);
+            List<string> pathListToCompare = _searchSettings.ListToCompare.Select(x => x.Path).ToList();
+            await SearchEngineManager.Search(pathListToCompare);
 
             List<long> uniqueSizesList = Globals.DB.GetUniqueSizes();
 
@@ -74,7 +73,7 @@ namespace DuplicatesFinder
                     state.Stop();
                 }
                 List<string> paths = Globals.DB.GetFilePathsBySize(uniqueSize);
-                var groupList = new FileCompare(_fileCompareMethod).GetIdenticalFileGroups(paths);
+                var groupList = new FileCompare(_searchSettings.CompareMethod).GetIdenticalFileGroups(paths);
                 if (groupList != null)
                 {
                     _updateQueue.Enqueue(groupList);

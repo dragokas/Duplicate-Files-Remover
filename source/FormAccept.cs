@@ -54,15 +54,24 @@ namespace DuplicatesFinder
 
         private async void buttonSearch_Click(object sender, EventArgs e)
         {
-            if (listViewSource.Items.Count == 0)
+            if (_sourceList.TryGetSourceEntryListChecked(out var entryList))
             {
-                MessageBox.Show("You must Drag & Drop at least one folder to compare!");
-                return;
+                SearchSettings searchSettings = new()
+                {
+                    ListToCompare = entryList,
+                    CompareMethod = GetCompareMethod(),
+                    MarkFirstItem = checkBoxMarkFirstItem.Checked,
+                    MatchExtensions = checkBoxMatchExtensions.Checked,
+                };
+                new FormResults(searchSettings).ShowDialog();
             }
-            new FormResults(GetFilePathList(), GetCompareMethod()).ShowDialog();
+            else
+            {
+                MessageBox.Show("You must Drag & Drop at least one folder to compare and mark a checkbox!");
+            }
         }
 
-        private List<string> GetFilePathList()
+        private List<string> GetFilePathListChecked()
         {
             return listViewSource.CheckedItems.Cast<ListViewItem>()
                 .Select(item => item.Text)
@@ -165,5 +174,15 @@ namespace DuplicatesFinder
             }
         }
 
+        private void protectFromDeletionToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            foreach (ListViewItem item in _lv.SelectedItems)
+            {
+                if (_sourceList.TryGetSourceEntry(item, out var entry))
+                {
+                    _sourceList.UpdateProtected(item, !entry.IsProtected);
+                }
+            }
+        }
     }
 }
