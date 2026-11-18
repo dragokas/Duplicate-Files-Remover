@@ -36,6 +36,8 @@
             columnHeaderType = new ColumnHeader();
             columnHeaderProtected = new ColumnHeader();
             groupBox1 = new GroupBox();
+            checkBoxSkipSameRootDirMatches = new CheckBox();
+            checkBoxMarkFirstItem = new CheckBox();
             checkBoxMatchExtensions = new CheckBox();
             label1 = new Label();
             numericUpDownNumBytesToCompare = new NumericUpDown();
@@ -52,7 +54,6 @@
             deleteFromListToolStripMenuItem = new ToolStripMenuItem();
             protectFromDeletionToolStripMenuItem = new ToolStripMenuItem();
             toolTip1 = new ToolTip(components);
-            checkBoxMarkFirstItem = new CheckBox();
             groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)numericUpDownNumBytesToCompare).BeginInit();
             panel1.SuspendLayout();
@@ -112,6 +113,7 @@
             // 
             // groupBox1
             // 
+            groupBox1.Controls.Add(checkBoxSkipSameRootDirMatches);
             groupBox1.Controls.Add(checkBoxMarkFirstItem);
             groupBox1.Controls.Add(checkBoxMatchExtensions);
             groupBox1.Controls.Add(label1);
@@ -121,23 +123,46 @@
             groupBox1.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 204);
             groupBox1.Location = new Point(7, 3);
             groupBox1.Name = "groupBox1";
-            groupBox1.Size = new Size(303, 282);
+            groupBox1.Size = new Size(303, 311);
             groupBox1.TabIndex = 4;
             groupBox1.TabStop = false;
             groupBox1.Text = "Compare method";
+            // 
+            // checkBoxSkipSameRootDirMatches
+            // 
+            checkBoxSkipSameRootDirMatches.AutoSize = true;
+            checkBoxSkipSameRootDirMatches.Font = new Font("Segoe UI", 9F, FontStyle.Regular, GraphicsUnit.Point, 204);
+            checkBoxSkipSameRootDirMatches.Location = new Point(19, 227);
+            checkBoxSkipSameRootDirMatches.Name = "checkBoxSkipSameRootDirMatches";
+            checkBoxSkipSameRootDirMatches.Size = new Size(269, 34);
+            checkBoxSkipSameRootDirMatches.TabIndex = 6;
+            checkBoxSkipSameRootDirMatches.Text = "Skip matches in same dir";
+            toolTip1.SetToolTip(checkBoxSkipSameRootDirMatches, resources.GetString("checkBoxSkipSameRootDirMatches.ToolTip"));
+            checkBoxSkipSameRootDirMatches.UseVisualStyleBackColor = true;
+            // 
+            // checkBoxMarkFirstItem
+            // 
+            checkBoxMarkFirstItem.AutoSize = true;
+            checkBoxMarkFirstItem.Font = new Font("Segoe UI", 9F, FontStyle.Regular, GraphicsUnit.Point, 204);
+            checkBoxMarkFirstItem.Location = new Point(19, 187);
+            checkBoxMarkFirstItem.Name = "checkBoxMarkFirstItem";
+            checkBoxMarkFirstItem.Size = new Size(279, 34);
+            checkBoxMarkFirstItem.TabIndex = 5;
+            checkBoxMarkFirstItem.Text = "Mark 1st item for deletion";
+            toolTip1.SetToolTip(checkBoxMarkFirstItem, resources.GetString("checkBoxMarkFirstItem.ToolTip"));
+            checkBoxMarkFirstItem.UseVisualStyleBackColor = true;
             // 
             // checkBoxMatchExtensions
             // 
             checkBoxMatchExtensions.AutoSize = true;
             checkBoxMatchExtensions.Font = new Font("Segoe UI", 9F, FontStyle.Regular, GraphicsUnit.Point, 204);
-            checkBoxMatchExtensions.Location = new Point(19, 227);
+            checkBoxMatchExtensions.Location = new Point(19, 267);
             checkBoxMatchExtensions.Name = "checkBoxMatchExtensions";
             checkBoxMatchExtensions.Size = new Size(269, 34);
             checkBoxMatchExtensions.TabIndex = 4;
             checkBoxMatchExtensions.Text = "Extensions should match";
-            toolTip1.SetToolTip(checkBoxMatchExtensions, "If enabled, the speed is a little bit faster");
+            toolTip1.SetToolTip(checkBoxMatchExtensions, "If enabled, the speed will be a little bit faster.\r\nIdentical files with different extensions will be skipped.");
             checkBoxMatchExtensions.UseVisualStyleBackColor = true;
-            checkBoxMatchExtensions.Visible = false;
             // 
             // label1
             // 
@@ -290,17 +315,6 @@
             protectFromDeletionToolStripMenuItem.Text = "Protect from Deletion mark";
             protectFromDeletionToolStripMenuItem.Click += protectFromDeletionToolStripMenuItem_Click;
             // 
-            // checkBoxMarkFirstItem
-            // 
-            checkBoxMarkFirstItem.AutoSize = true;
-            checkBoxMarkFirstItem.Font = new Font("Segoe UI", 9F, FontStyle.Regular, GraphicsUnit.Point, 204);
-            checkBoxMarkFirstItem.Location = new Point(19, 187);
-            checkBoxMarkFirstItem.Name = "checkBoxMarkFirstItem";
-            checkBoxMarkFirstItem.Size = new Size(279, 34);
-            checkBoxMarkFirstItem.TabIndex = 5;
-            checkBoxMarkFirstItem.Text = "Mark 1st item for deletion";
-            checkBoxMarkFirstItem.UseVisualStyleBackColor = true;
-            // 
             // FormAccept
             // 
             AllowDrop = true;
@@ -358,5 +372,6 @@
         private ColumnHeader columnHeaderProtected;
         private ToolStripMenuItem protectFromDeletionToolStripMenuItem;
         private CheckBox checkBoxMarkFirstItem;
+        private CheckBox checkBoxSkipSameRootDirMatches;
     }
 }

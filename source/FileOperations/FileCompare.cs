@@ -10,49 +10,58 @@ using System.Threading.Tasks;
 
 namespace DuplicatesFinder
 {
-    public enum FileCompareAlgorithm
-    {
-        ByHash,     // XXH3 hash of entire file
-        ByLastBytes // XXH3 hash of the last few bytes of the file
-    }
-
-    public class FileCompareMethod
-    {
-        public FileCompareAlgorithm Algorithm;
-        public int NumLastBytes;
-
-        public FileCompareMethod() { }
-        public FileCompareMethod(FileCompareAlgorithm algorithm, int numLastBytes = 0)
-        {
-            Algorithm = algorithm;
-            NumLastBytes = numLastBytes;
-        }
-    }
-
-    public class FileCompareGroup
-    {
-        public List<FileCompareMetadata> MetadataList = new();
-
-        public FileCompareGroup() { }
-        public FileCompareGroup(FileCompareMetadata metadata)
-        {
-            MetadataList.Add(metadata);
-        }
-    }
-
     internal class FileCompare
     {
         private FileCompareMethod _fileCompareMethod;
+        private GroupCompareMethod _groupCompareMethod;
 
-        internal FileCompare(FileCompareMethod fileCompareMethod)
+        internal FileCompare(FileCompareMethod fileCompareMethod, GroupCompareMethod groupCompareMethod)
         {
             _fileCompareMethod = fileCompareMethod;
+            _groupCompareMethod = groupCompareMethod;
         }
-        
+
         // returns Hash + Metadata
         // may returns several groups per same file size:
-        // e.g. file1 + file2 are same; file3 + file4 are same; but file1 and file 3 are not.
+        // e.g. file1 + file2 are same; file3 + file4 are same; but file1 and file 3 are not content same.
         internal List<FileCompareGroup>? GetIdenticalFileGroups(List<string> fileList_WithIdenticalSize)
+        {
+            var groupList = GetIdenticalFileGroups_Internal(fileList_WithIdenticalSize);
+            if (groupList == null)
+            {
+                return null;
+            }
+            if (_groupCompareMethod.DropGroupWithSameRootDir)
+            {
+                RemoveGroupsHavingSameRootDir(ref groupList);
+            }
+            return groupList;
+        }
+
+        private void RemoveGroupsHavingSameRootDir(ref List<FileCompareGroup> groupList)
+        {
+            for (int i = groupList.Count - 1; i >= 0; i--)
+            {
+                if (GroupBelongsToSameRootDir(groupList[i]))
+                {
+                    groupList.Remove(groupList[i]);
+                }
+            }
+        }
+
+        private bool GroupBelongsToSameRootDir(FileCompareGroup group)
+        {
+            if (_groupCompareMethod.RootDirs == null)
+            {
+                return false;
+            }
+            var matchedRootDirs = new HashSet<string>(
+                _groupCompareMethod.RootDirs.Where(root => group.MetadataList.Any(meta =>
+                    meta.FilePath.StartsWith(@"\\?\" + root, StringComparison.OrdinalIgnoreCase))), StringComparer.OrdinalIgnoreCase);
+            return (matchedRootDirs.Count == 1);
+        }
+
+        private List<FileCompareGroup>? GetIdenticalFileGroups_Internal(List<string> fileList_WithIdenticalSize)
         {
             if (fileList_WithIdenticalSize.Count() <= 1)
             {

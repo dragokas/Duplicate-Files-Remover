@@ -8,6 +8,8 @@ namespace DuplicatesFinder
         [STAThread]
         static void Main()
         {
+            Globals.AppVersion = "1.6";
+
             ApplicationConfiguration.Initialize();
 
             bool createdNew;

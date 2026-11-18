@@ -7,6 +7,14 @@ namespace DuplicatesFinder
     internal class Globals
     {
         internal static readonly string AppName = "Find My Duplicates";
+        internal static string AppVersion = "";
+        internal static string AppTitle
+        {
+            get
+            {
+                return AppName + " v" + AppVersion;
+            }
+        }
 
         internal static readonly DatabaseFS DB = new(eraseDatabase: true);
         internal static SearchThreadManager SearchThreadMan = new(Environment.ProcessorCount);

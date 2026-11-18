@@ -17,6 +17,7 @@ namespace DuplicatesFinder
             _lv = _sourceList.GetListView();
             _dragDropOverlay = new(this, "⇨ Drop files here ⇦");
 
+            this.Text = Globals.AppTitle;
             this.MinimumSize = new Size(this.Width, this.Height);
         }
 
@@ -59,9 +60,12 @@ namespace DuplicatesFinder
                 SearchSettings searchSettings = new()
                 {
                     ListToCompare = entryList,
-                    CompareMethod = GetCompareMethod(),
+                    FileCompareMethod = GetCompareMethod(),
+                    GroupCompareMethod = new GroupCompareMethod(
+                        checkBoxSkipSameRootDirMatches.Checked,
+                        entryList.Select(x => x.Path).ToList()),
                     MarkFirstItem = checkBoxMarkFirstItem.Checked,
-                    MatchExtensions = checkBoxMatchExtensions.Checked,
+                    MatchExtensions = checkBoxMatchExtensions.Checked
                 };
                 new FormResults(searchSettings).ShowDialog();
             }

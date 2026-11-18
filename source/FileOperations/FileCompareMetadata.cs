@@ -5,14 +5,14 @@ using System.Text;
 
 namespace DuplicatesFinder
 {
-    public class FileCompareMetadata
+    internal class FileCompareMetadata
     {
-        public string FilePath = "";
-        public ulong? Hash = null;
-        public ulong PartialHash = 0;
-        public long Size = 0;
+        internal string FilePath = "";
+        internal ulong? Hash = null;
+        internal ulong PartialHash = 0;
+        internal long Size = 0;
 
-        public string FileName
+        internal string FileName
         {
             get
             {
@@ -20,7 +20,7 @@ namespace DuplicatesFinder
             }
         }
 
-        public FileCompareMetadata(string path, FileCompareMethod fileCompareMethod)
+        internal FileCompareMetadata(string path, FileCompareMethod fileCompareMethod)
         {
             if (!path.StartsWith(@"\\?\"))
             {

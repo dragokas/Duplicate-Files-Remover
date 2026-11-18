@@ -166,6 +166,26 @@ namespace DuplicatesFinder
                 .ToList();
         }
 
+        internal Dictionary<string, List<string>> GetFilePathsBySizeAndExtension(long size)
+        {
+            DataTable table = new();
+            SQLiteCommand command = this.Connection.CreateCommand();
+            command.CommandText = "SELECT " + ColumnName.path + ", Ext FROM " + TableName + " "
+                + "WHERE " + ColumnName.size + " = @p1";
+            command.CommandType = CommandType.Text;
+            command.Parameters.Add(new SQLiteParameter("@p1", size));
+            SQLiteDataAdapter adapter = new();
+            adapter.SelectCommand = command;
+            adapter.Fill(table);
+            return table.AsEnumerable()
+                .GroupBy(row => row.Field<string>("Ext") ?? string.Empty)
+                .ToDictionary(
+                    group => group.Key,
+                    group => group.Select(row => row.Field<string>(ColumnName.path)!).ToList(),
+                    StringComparer.OrdinalIgnoreCase
+                );
+        }
+
         internal List<long> GetUniqueSizes()
         {
             List<long> uniqueSizes = new();

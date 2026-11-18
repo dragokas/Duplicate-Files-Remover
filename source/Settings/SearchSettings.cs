@@ -7,10 +7,9 @@ namespace DuplicatesFinder
     internal class SearchSettings
     {
         internal List<SourceEntry> ListToCompare { get; set; } = new();
-        internal FileCompareMethod CompareMethod { get; set; } = new();
+        internal FileCompareMethod FileCompareMethod { get; set; } = new();
+        internal GroupCompareMethod GroupCompareMethod { get; set; } = new();
         internal bool MarkFirstItem { get; set; } = false;
-
-        // Not implemented
         internal bool MatchExtensions { get; set; } = false;
     }
 }

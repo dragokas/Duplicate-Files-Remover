@@ -72,11 +72,25 @@ namespace DuplicatesFinder
                 {
                     state.Stop();
                 }
-                List<string> paths = Globals.DB.GetFilePathsBySize(uniqueSize);
-                var groupList = new FileCompare(_searchSettings.CompareMethod).GetIdenticalFileGroups(paths);
-                if (groupList != null)
+
+                Dictionary<string, List<string>> groupsByExt = new();
+                if (_searchSettings.MatchExtensions)
                 {
-                    _updateQueue.Enqueue(groupList);
+                    groupsByExt = Globals.DB.GetFilePathsBySizeAndExtension(uniqueSize);
+                }
+                else
+                {
+                    groupsByExt.Add(".ext", Globals.DB.GetFilePathsBySize(uniqueSize));
+                }
+                foreach (var paths in groupsByExt.Values)
+                {
+                    var fileCompare = new FileCompare(
+                        _searchSettings.FileCompareMethod, _searchSettings.GroupCompareMethod);
+                    var groupList = fileCompare.GetIdenticalFileGroups(paths);
+                    if (groupList != null)
+                    {
+                        _updateQueue.Enqueue(groupList);
+                    }
                 }
                 _progressBarData.Increment();
             });
@@ -103,7 +117,7 @@ namespace DuplicatesFinder
         {
             bool toRecycleBin = checkBoxRecycleBin.Checked;
 
-            if (MessageBox.Show($"Remove {paths.Count} file(s) " + (toRecycleBin ? "to Recycle bin?" : "completely?"),
+            if (MessageBox.Show($"Remove {paths.Count} file(s) " + (toRecycleBin ? "to Recycle bin?" : "permanently?"),
                 "", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.No)
             {
                 return;
@@ -326,13 +340,14 @@ namespace DuplicatesFinder
             int numTotalMatches = 0;
             int numTotalInitialMatches = 0;
             int numSeparateGroups = 0;
-            FileCompareMethod compareMethod = new(FileCompareAlgorithm.ByHash);
+            FileCompareMethod fileCompareMethod = new(FileCompareAlgorithm.ByHash);
             var selectedGroups = _lvManager.GetSelectedGroups();
             foreach (var group in selectedGroups)
             {
                 var items = _lvManager.GetGroupItems(group);
                 var paths = items.Select(x => x.Text).ToList();
-                var newGroupList = new FileCompare(compareMethod).GetIdenticalFileGroups(paths);
+                var fileCompare = new FileCompare(fileCompareMethod, _searchSettings.GroupCompareMethod);
+                var newGroupList = fileCompare.GetIdenticalFileGroups(paths);
                 numTotalInitialMatches += items.Count;
 
                 if (newGroupList == null || newGroupList.Count != 1 || newGroupList[0].MetadataList.Count != items.Count)

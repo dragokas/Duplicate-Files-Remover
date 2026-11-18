@@ -120,6 +120,21 @@
   <metadata name="toolTip1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>264, 17</value>
   </metadata>
+  <data name="checkBoxSkipSameRootDirMatches.ToolTip" xml:space="preserve">
+    <value>If set "yes", duplicates located in the same root Path will be not visible. 
+Let's say you've added 2 Paths for comparision "d:\first" and "d:\second", 
+the report will only display duplicates if they are located in both "d:\first" and "d:\second" 
+directories. Duplicates in a same "d:\first" will be ignored, even if the files 
+are located at different child level (e.g. d:\first\aaa\file.txt + d:\first\bbb\file.txt).
+
+</value>
+  </data>
+  <data name="checkBoxMarkFirstItem.ToolTip" xml:space="preserve">
+    <value>By default (false) - all duplicated items in result list will be marked for deletion, 
+except the 1st item. When (true) - 1st item will be marked instead, but at the
+same time 2nd items will not be marked. This checkbox will not change
+behavior of marking 3rd, 4th etc items.</value>
+  </data>
   <metadata name="contextMenuStrip1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>17, 17</value>
   </metadata>

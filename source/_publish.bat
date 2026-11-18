@@ -40,12 +40,12 @@ for /f %%a in ('dir /b /ad') do (
 )
 popd
 
-call "%~DP0\protector\ProtectMe.cmd" -silent
+::call "%~DP0\protector\ProtectMe.cmd" -silent
 
 :: save mapping file
-set "map_folder=%~DP0\protector\mapping\%date%"
-md "%map_folder%" 2>nul
-move /y "%release_dir%\*.nrmap" "%map_folder%\"
+::set "map_folder=%~DP0\protector\mapping\%date%"
+::md "%map_folder%" 2>nul
+::move /y "%release_dir%\*.nrmap" "%map_folder%\"
 
 :: Prepare release archive
 if exist "%prj%.zip" del "%prj%.zip"
