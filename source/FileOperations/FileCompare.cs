@@ -24,9 +24,19 @@ namespace DuplicatesFinder
         // returns Hash + Metadata
         // may returns several groups per same file size:
         // e.g. file1 + file2 are same; file3 + file4 are same; but file1 and file 3 are not content same.
-        internal List<FileCompareGroup>? GetIdenticalFileGroups(List<string> fileList_WithIdenticalSize)
+        //
+        // for FileCompareAlgorithm.ByName -> returns data as is, with Metadata appended
+        internal List<FileCompareGroup>? GetIdenticalFileGroups(List<string> searchedGroups)
         {
-            var groupList = GetIdenticalFileGroups_Internal(fileList_WithIdenticalSize);
+            List<FileCompareGroup>? groupList;
+            if (_fileCompareMethod.Algorithm == FileCompareAlgorithm.ByName)
+            {
+                groupList = GetIdenticalFileGroups_ByName(searchedGroups);
+            }
+            else
+            {
+                groupList = GetIdenticalFileGroups_Internal(searchedGroups);
+            }
             if (groupList == null)
             {
                 return null;
@@ -61,6 +71,24 @@ namespace DuplicatesFinder
             return (matchedRootDirs.Count == 1);
         }
 
+        private List<FileCompareGroup>? GetIdenticalFileGroups_ByName(List<string> fileList_WithIdentacalName)
+        {
+            if (fileList_WithIdentacalName.Count < 2)
+            {
+                return null;
+            }
+
+            List<FileCompareMetadata> filesMetadata = new();
+            FileCompareGroup group = new();
+
+            foreach (var path in fileList_WithIdentacalName)
+            {
+                group.MetadataList.Add(new FileCompareMetadata(path, _fileCompareMethod, false));
+            }
+
+            return new() { group };
+        }
+
         private List<FileCompareGroup>? GetIdenticalFileGroups_Internal(List<string> fileList_WithIdenticalSize)
         {
             if (fileList_WithIdenticalSize.Count() <= 1)
@@ -70,7 +98,7 @@ namespace DuplicatesFinder
 
             List<FileCompareMetadata> filesMetadata = new();
 
-            foreach (var file in fileList_WithIdenticalSize)
+            Parallel.ForEach(fileList_WithIdenticalSize, file =>
             {
                 try
                 {
@@ -85,7 +113,7 @@ namespace DuplicatesFinder
                 {
                     Log.Error("Failed to read file: " + file);
                 }
-            }
+            });
 
             if (filesMetadata.Count < 2)
             {
@@ -125,12 +153,15 @@ namespace DuplicatesFinder
             {
                 if (rootCompareGroup.MetadataList.Count > 1)
                 {
-                    foreach (var meta in rootCompareGroup.MetadataList)
+                    Parallel.ForEach(rootCompareGroup.MetadataList, meta =>
                     {
                         if (meta.Hash == null)
                         {
                             meta.Hash = Hasher.GetHash(meta.FilePath);
                         }
+                    });
+                    foreach (var meta in rootCompareGroup.MetadataList)
+                    {
                         if (meta.Hash != null)
                         {
                             if (fullyIdenticalGroup.TryGetValue((ulong)meta.Hash, out var compareGroup)

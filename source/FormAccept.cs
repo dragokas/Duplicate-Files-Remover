@@ -84,9 +84,19 @@ namespace DuplicatesFinder
 
         private FileCompareMethod GetCompareMethod()
         {
-            return new FileCompareMethod(
-                radioButtonCompareMethodFast.Checked ? FileCompareAlgorithm.ByLastBytes : FileCompareAlgorithm.ByHash,
-                (int)numericUpDownNumBytesToCompare.Value);
+            if (radioButtonCompareMethodFast.Checked)
+            {
+                return new FileCompareMethod(FileCompareAlgorithm.ByLastBytes, (int)numericUpDownNumBytesToCompare.Value);
+            }
+            if (radioButtonCompareMethodSlow.Checked)
+            {
+                return new FileCompareMethod(FileCompareAlgorithm.ByHash);
+            }
+            if (radioButtonCompareMethodByName.Checked)
+            {
+                return new FileCompareMethod(FileCompareAlgorithm.ByName);
+            }
+            throw new Exception("Compare method not implemented");
         }
 
         private void Form1_DragDrop(object sender, DragEventArgs e)

@@ -20,7 +20,7 @@ namespace DuplicatesFinder
             }
         }
 
-        internal FileCompareMetadata(string path, FileCompareMethod fileCompareMethod)
+        internal FileCompareMetadata(string path, FileCompareMethod fileCompareMethod, bool checkHash = true)
         {
             if (!path.StartsWith(@"\\?\"))
             {
@@ -29,7 +29,10 @@ namespace DuplicatesFinder
             var fi = new FileInfo(path);
             this.FilePath = path;
             this.Size = fi.Length;
-            this.PartialHash = Hasher.GetHash(ReadFileLastBytes(fileCompareMethod.NumLastBytes));
+            if (checkHash)
+            {
+                this.PartialHash = Hasher.GetHash(ReadFileLastBytes(fileCompareMethod.NumLastBytes));
+            }
         }
 
         private byte[] ReadFileLastBytes(int numBytesToRead)

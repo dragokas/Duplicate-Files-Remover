@@ -54,6 +54,7 @@
             deleteFromListToolStripMenuItem = new ToolStripMenuItem();
             protectFromDeletionToolStripMenuItem = new ToolStripMenuItem();
             toolTip1 = new ToolTip(components);
+            radioButtonCompareMethodByName = new RadioButton();
             groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)numericUpDownNumBytesToCompare).BeginInit();
             panel1.SuspendLayout();
@@ -71,7 +72,7 @@
             // 
             // buttonSearch
             // 
-            buttonSearch.Location = new Point(72, 335);
+            buttonSearch.Location = new Point(86, 423);
             buttonSearch.Name = "buttonSearch";
             buttonSearch.Size = new Size(162, 70);
             buttonSearch.TabIndex = 2;
@@ -88,7 +89,7 @@
             listViewSource.GridLines = true;
             listViewSource.Location = new Point(0, 0);
             listViewSource.Name = "listViewSource";
-            listViewSource.Size = new Size(824, 371);
+            listViewSource.Size = new Size(824, 434);
             listViewSource.TabIndex = 3;
             listViewSource.UseCompatibleStateImageBehavior = false;
             listViewSource.View = View.Details;
@@ -113,6 +114,7 @@
             // 
             // groupBox1
             // 
+            groupBox1.Controls.Add(radioButtonCompareMethodByName);
             groupBox1.Controls.Add(checkBoxSkipSameRootDirMatches);
             groupBox1.Controls.Add(checkBoxMarkFirstItem);
             groupBox1.Controls.Add(checkBoxMatchExtensions);
@@ -123,7 +125,7 @@
             groupBox1.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 204);
             groupBox1.Location = new Point(7, 3);
             groupBox1.Name = "groupBox1";
-            groupBox1.Size = new Size(303, 311);
+            groupBox1.Size = new Size(303, 401);
             groupBox1.TabIndex = 4;
             groupBox1.TabStop = false;
             groupBox1.Text = "Compare method";
@@ -132,7 +134,7 @@
             // 
             checkBoxSkipSameRootDirMatches.AutoSize = true;
             checkBoxSkipSameRootDirMatches.Font = new Font("Segoe UI", 9F, FontStyle.Regular, GraphicsUnit.Point, 204);
-            checkBoxSkipSameRootDirMatches.Location = new Point(19, 227);
+            checkBoxSkipSameRootDirMatches.Location = new Point(19, 304);
             checkBoxSkipSameRootDirMatches.Name = "checkBoxSkipSameRootDirMatches";
             checkBoxSkipSameRootDirMatches.Size = new Size(269, 34);
             checkBoxSkipSameRootDirMatches.TabIndex = 6;
@@ -144,7 +146,7 @@
             // 
             checkBoxMarkFirstItem.AutoSize = true;
             checkBoxMarkFirstItem.Font = new Font("Segoe UI", 9F, FontStyle.Regular, GraphicsUnit.Point, 204);
-            checkBoxMarkFirstItem.Location = new Point(19, 187);
+            checkBoxMarkFirstItem.Location = new Point(19, 264);
             checkBoxMarkFirstItem.Name = "checkBoxMarkFirstItem";
             checkBoxMarkFirstItem.Size = new Size(279, 34);
             checkBoxMarkFirstItem.TabIndex = 5;
@@ -156,7 +158,7 @@
             // 
             checkBoxMatchExtensions.AutoSize = true;
             checkBoxMatchExtensions.Font = new Font("Segoe UI", 9F, FontStyle.Regular, GraphicsUnit.Point, 204);
-            checkBoxMatchExtensions.Location = new Point(19, 267);
+            checkBoxMatchExtensions.Location = new Point(19, 344);
             checkBoxMatchExtensions.Name = "checkBoxMatchExtensions";
             checkBoxMatchExtensions.Size = new Size(269, 34);
             checkBoxMatchExtensions.TabIndex = 4;
@@ -214,7 +216,7 @@
             panel1.Dock = DockStyle.Fill;
             panel1.Location = new Point(0, 0);
             panel1.Name = "panel1";
-            panel1.Size = new Size(322, 450);
+            panel1.Size = new Size(322, 527);
             panel1.TabIndex = 6;
             // 
             // splitContainer1
@@ -232,7 +234,7 @@
             // 
             splitContainer1.Panel2.Controls.Add(panel1);
             splitContainer1.Panel2MinSize = 320;
-            splitContainer1.Size = new Size(1150, 450);
+            splitContainer1.Size = new Size(1150, 527);
             splitContainer1.SplitterDistance = 824;
             splitContainer1.TabIndex = 7;
             splitContainer1.SplitterMoved += splitContainer1_SplitterMoved;
@@ -254,8 +256,8 @@
             splitContainer2.Panel2.Controls.Add(buttonAddFolder);
             splitContainer2.Panel2.Controls.Add(buttonClearList);
             splitContainer2.Panel2MinSize = 75;
-            splitContainer2.Size = new Size(824, 450);
-            splitContainer2.SplitterDistance = 371;
+            splitContainer2.Size = new Size(824, 527);
+            splitContainer2.SplitterDistance = 434;
             splitContainer2.TabIndex = 8;
             splitContainer2.SplitterMoved += splitContainer2_SplitterMoved;
             // 
@@ -315,12 +317,26 @@
             protectFromDeletionToolStripMenuItem.Text = "Protect from Deletion mark";
             protectFromDeletionToolStripMenuItem.Click += protectFromDeletionToolStripMenuItem_Click;
             // 
+            // radioButtonCompareMethodByName
+            // 
+            radioButtonCompareMethodByName.AutoSize = true;
+            radioButtonCompareMethodByName.Font = new Font("Segoe UI", 9F, FontStyle.Regular, GraphicsUnit.Point, 204);
+            radioButtonCompareMethodByName.ForeColor = Color.Red;
+            radioButtonCompareMethodByName.Location = new Point(19, 168);
+            radioButtonCompareMethodByName.Name = "radioButtonCompareMethodByName";
+            radioButtonCompareMethodByName.Size = new Size(122, 34);
+            radioButtonCompareMethodByName.TabIndex = 7;
+            radioButtonCompareMethodByName.TabStop = true;
+            radioButtonCompareMethodByName.Text = "By Name";
+            toolTip1.SetToolTip(radioButtonCompareMethodByName, "Warning:\r\nFile contents not verified by this method !!!\r\nResults list displays only file name match.");
+            radioButtonCompareMethodByName.UseVisualStyleBackColor = true;
+            // 
             // FormAccept
             // 
             AllowDrop = true;
             AutoScaleDimensions = new SizeF(12F, 30F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(1150, 450);
+            ClientSize = new Size(1150, 527);
             Controls.Add(splitContainer1);
             Icon = (Icon)resources.GetObject("$this.Icon");
             Name = "FormAccept";
@@ -373,5 +389,6 @@
         private ToolStripMenuItem protectFromDeletionToolStripMenuItem;
         private CheckBox checkBoxMarkFirstItem;
         private CheckBox checkBoxSkipSameRootDirMatches;
+        private RadioButton radioButtonCompareMethodByName;
     }
 }

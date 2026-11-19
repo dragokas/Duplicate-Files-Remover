@@ -11,6 +11,7 @@ namespace DuplicatesFinder
         {
             internal static readonly string id = "id";
             internal static readonly string path = "Path";
+            internal static readonly string name = "Name";
             internal static readonly string extension = "Ext";
             internal static readonly string size = "Size";
         }
@@ -96,6 +97,7 @@ namespace DuplicatesFinder
                 Command.CommandText = "CREATE TABLE " + TableName + " (" +
                     ColumnName.id + " INTEGER NOT NULL UNIQUE, " +
                     ColumnName.path + " TEXT NOT NULL, " +
+                    ColumnName.name + " TEXT NOT NULL, " +
                     ColumnName.extension + " TEXT NOT NULL, " +
                     ColumnName.size + " INTEGER NOT NULL, " +
                     "UNIQUE(" + ColumnName.path + "), " +
@@ -117,16 +119,18 @@ namespace DuplicatesFinder
             {
                 SQLiteCommand Command = new SQLiteCommand();
                 Command = this.Connection.CreateCommand();
-                Command.CommandText = String.Format("REPLACE INTO {0} ({1},{2},{3}) VALUES (@p1,@p2,@p3)",
+                Command.CommandText = String.Format("REPLACE INTO {0} ({1},{2},{3},{4}) VALUES (@p1,@p2,@p3,@p4)",
                     TableName,
                     ColumnName.path,      // p1
-                    ColumnName.extension, // p2
-                    ColumnName.size       // p3
+                    ColumnName.name,      // p2
+                    ColumnName.extension, // p3
+                    ColumnName.size       // p4
                     );
                 Command.CommandType = CommandType.Text;
                 Command.Parameters.Add(new SQLiteParameter("@p1", path));
-                Command.Parameters.Add(new SQLiteParameter("@p2", Path.GetExtension(path)));
-                Command.Parameters.Add(new SQLiteParameter("@p3", size));
+                Command.Parameters.Add(new SQLiteParameter("@p2", Path.GetFileName(path))); 
+                Command.Parameters.Add(new SQLiteParameter("@p3", Path.GetExtension(path)));
+                Command.Parameters.Add(new SQLiteParameter("@p4", size));
                 if (Command.ExecuteNonQuery() > 0)
                 {
                     isChanged = true;
@@ -179,6 +183,24 @@ namespace DuplicatesFinder
             adapter.Fill(table);
             return table.AsEnumerable()
                 .GroupBy(row => row.Field<string>("Ext") ?? string.Empty)
+                .ToDictionary(
+                    group => group.Key,
+                    group => group.Select(row => row.Field<string>(ColumnName.path)!).ToList(),
+                    StringComparer.OrdinalIgnoreCase
+                );
+        }
+
+        internal Dictionary<string, List<string>> GetFilePathsByName()
+        {
+            DataTable table = new();
+            SQLiteCommand command = this.Connection.CreateCommand();
+            command.CommandText = "SELECT " + ColumnName.path + ", Name FROM " + TableName;
+            command.CommandType = CommandType.Text;
+            SQLiteDataAdapter adapter = new();
+            adapter.SelectCommand = command;
+            adapter.Fill(table);
+            return table.AsEnumerable()
+                .GroupBy(row => row.Field<string>("Name") ?? string.Empty)
                 .ToDictionary(
                     group => group.Key,
                     group => group.Select(row => row.Field<string>(ColumnName.path)!).ToList(),

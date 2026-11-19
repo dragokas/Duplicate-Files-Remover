@@ -61,39 +61,65 @@ namespace DuplicatesFinder
             List<string> pathListToCompare = _searchSettings.ListToCompare.Select(x => x.Path).ToList();
             await SearchEngineManager.Search(pathListToCompare);
 
-            List<long> uniqueSizesList = Globals.DB.GetUniqueSizes();
-
-            _progressBarData.CurrentValue = 0;
-            _progressBarData.Total = uniqueSizesList.Count();
-
-            Parallel.ForEach(uniqueSizesList, (uniqueSize, state) =>
+            if (_searchSettings.FileCompareMethod.Algorithm == FileCompareAlgorithm.ByName)
             {
-                if (_isCancelled)
-                {
-                    state.Stop();
-                }
+                var searchedGroups = Globals.DB.GetFilePathsByName();
 
-                Dictionary<string, List<string>> groupsByExt = new();
-                if (_searchSettings.MatchExtensions)
+                _progressBarData.CurrentValue = 0;
+                _progressBarData.Total = searchedGroups.Count();
+
+                Parallel.ForEach(searchedGroups, (searchedGroupPair, state) =>
                 {
-                    groupsByExt = Globals.DB.GetFilePathsBySizeAndExtension(uniqueSize);
-                }
-                else
-                {
-                    groupsByExt.Add(".ext", Globals.DB.GetFilePathsBySize(uniqueSize));
-                }
-                foreach (var paths in groupsByExt.Values)
-                {
+                    if (_isCancelled)
+                    {
+                        state.Stop();
+                    }
+                    var searchedGroup = searchedGroupPair.Value;
                     var fileCompare = new FileCompare(
-                        _searchSettings.FileCompareMethod, _searchSettings.GroupCompareMethod);
-                    var groupList = fileCompare.GetIdenticalFileGroups(paths);
+                            _searchSettings.FileCompareMethod, _searchSettings.GroupCompareMethod);
+                    var groupList = fileCompare.GetIdenticalFileGroups(searchedGroup);
                     if (groupList != null)
                     {
                         _updateQueue.Enqueue(groupList);
                     }
-                }
-                _progressBarData.Increment();
-            });
+                    _progressBarData.Increment();
+                });
+            }
+            else
+            {
+                List<long> uniqueSizesList = Globals.DB.GetUniqueSizes();
+
+                _progressBarData.CurrentValue = 0;
+                _progressBarData.Total = uniqueSizesList.Count();
+
+                Parallel.ForEach(uniqueSizesList, (uniqueSize, state) =>
+                {
+                    if (_isCancelled)
+                    {
+                        state.Stop();
+                    }
+                    Dictionary<string, List<string>> searchedGroups = new();
+                    if (_searchSettings.MatchExtensions)
+                    {
+                        searchedGroups = Globals.DB.GetFilePathsBySizeAndExtension(uniqueSize);
+                    }
+                    else
+                    {
+                        searchedGroups.Add(".ext", Globals.DB.GetFilePathsBySize(uniqueSize));
+                    }
+                    foreach (var searchedGroup in searchedGroups.Values)
+                    {
+                        var fileCompare = new FileCompare(
+                            _searchSettings.FileCompareMethod, _searchSettings.GroupCompareMethod);
+                        var groupList = fileCompare.GetIdenticalFileGroups(searchedGroup);
+                        if (groupList != null)
+                        {
+                            _updateQueue.Enqueue(groupList);
+                        }
+                    }
+                    _progressBarData.Increment();
+                });
+            }
 
             _elapsedTimeWatcher.Stop();
             _elapsedTimeWatcher.Print();

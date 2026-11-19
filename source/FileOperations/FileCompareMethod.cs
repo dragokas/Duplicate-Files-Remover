@@ -6,8 +6,9 @@ namespace DuplicatesFinder
 {
     internal enum FileCompareAlgorithm
     {
-        ByHash,     // XXH3 hash of entire file
-        ByLastBytes // XXH3 hash of the last few bytes of the file
+        ByHash,      // XXH3 hash of entire file
+        ByLastBytes, // XXH3 hash of the last few bytes of the file
+        ByName
     }
 
     internal class FileCompareMethod
